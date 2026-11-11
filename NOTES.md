@@ -18,13 +18,19 @@ The model line above is deliberately blank: the existing NOTES.md and .env menti
 
 The key belongs only in this folder’s `.env` as `OPENAI_API_KEY=...`. Never paste it into chat. The server reads it only from that file, not from the browser or inherited environment. `.env` is ignored by Git and is never served to the browser. Model/key changes are read on the next request; refresh the page to update the setup label. OpenAI API usage may cost money.
 
+## Security alert from 2026-11-10
+
+A key was pasted directly into chat. Treat it as compromised: revoke/delete it in OpenAI’s dashboard with a trusted adult, create a new key, and put only the new key in `.env`. Never paste a key into chat, email, screenshots, video, or NOTES.md. This repository does not contain that file or key.
+
 ## What’s done
 
 - BRIEF.md is the original, unchanged project brief and guides the build.
 - One goal at a time: collect litter, reuse materials, save food, save measured electricity, or avoid single-use items. “Prevent litter” is an item count, not an estimate of total pollution.
 - A symbolic tree grows at 20%, 40%, 60%, 80%, and 100%. Only actions entered by the user count; the AI cannot add progress.
 - Three made-up example goals contain no real people and start at zero when planted.
-- All browser saving is in `public/storage.js`. Goals and privacy-warning counts are saved; chats are not.
+- The free Growth Shop unlocks permanently when the first tree reaches 100%. It has three source-linked articles, one goal-focused first, and no purchases, accounts, or personal-information requests.
+- Every AI question is classified as `goal` or `off_topic` using the active goal label and safety hint. On-topic answers respond to the actual question; off-topic answers are brief and warmly invite a goal-related question. Safety rules take precedence.
+- All browser saving is in `public/storage.js`. Goals, privacy-warning counts, and permanent Growth Shop unlock are saved; chats are not.
 - Saves on this computer only for now. More precisely, data stays in this browser and local address. Clearing browser data removes it. Browser data is not encrypted and people sharing the same browser profile can see it.
 - All OpenAI requests are in `openai.mjs`, called only by the local server after the user submits a question with the check mark. Every request includes the complete “My AI’s instructions” section from BRIEF.md as system instructions, plus child-safety and factual rules.
 - The brief’s “build and generate the website” wording is treated as the original builder task. Inside the finished website, the AI helps with environmental goals and honestly describes user-recorded progress; it does not claim to edit the website.
@@ -53,16 +59,20 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 3. Show “Thinking…” and the answer with its source, if a factual source was used.
 4. In a clearly labelled demonstration, enter 2 items: the tree reaches 20%. Only enter actual actions during real use.
 5. Refresh: the goal and 20% progress remain, but the chat does not.
-6. Add 2 at a time to see all five stages. You can change the goal after a confirmation.
-7. Test safety separately using made-up details only. First input like “My address is 123 Example Street” warns; a second closes AI. Do not use real details. This locks that browser’s AI space, so do not do it in the same browser before filming the normal flow.
+6. Add progress until 100%. Show all five tree stages, then scroll to the Growth Shop as it changes from Locked to Open. Open one article and show its source link.
+7. Press “Ask your guide about this,” then press the check mark. Show the classification label and answer.
+8. Refresh: the goal/shop unlock remains, but the chat does not.
+9. Test safety separately using made-up details only. First input like “My address is 123 Example Street” warns; a second closes AI. Do not use real details. This locks that browser’s AI space, so do not do it in the same browser before filming the normal flow.
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. Real AI verification is waiting for the user-supplied .env and model name. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 21/21 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path; it has not yet been called with a live key because `.env` and the model name are still missing. No mock reply is used as a substitute for real AI in the app.
+
+A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
 
 ## Maybe Later
 
-- The free article shop unlocked by completing the first tree; hopeful, factual articles and cosmetic rewards.
+- More Growth Shop articles, teacher/student review, cosmetic plant accessories, and research on whether article reading increases goal completion.
 - More trees, goal history, optional reminders, and measured user testing against ordinary recycling information.
 - School-approved local recycling rules and teacher-reviewed printable announcements.
 - A database and optional accounts only after an adult reviews privacy, consent, access, retention, and deletion rules.
@@ -72,4 +82,8 @@ Implementation is ready for local browser and automated testing. Real AI verific
 
 ## What’s next
 
-Supply the missing local AI settings, finish automated/browser checks, and make a local Git save point after saving is verified. Keep all private .env files outside the save point.
+1. With a trusted adult, revoke the leaked OpenAI key and create a new one.
+2. Copy `.env.example` to `.env`, then paste only the new key into `.env`.
+3. Replace the blank `OpenAI model:` line above with the exact model name shown in your OpenAI account.
+4. Restart the app and test one on-topic question, one off-topic question, one article question, and one unsafe/personal-information question using made-up data.
+5. Make another local Git save point after real AI works. Never commit `.env`.
