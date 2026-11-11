@@ -1,0 +1,386 @@
+import { goalTypes, sampleGoals, progress, treeStage, validGoal, addProgress } from './goals.js';
+import { articles, featuredArticle } from './articles.js';
+import { loadState, saveState, removeGoal } from './storage.js';
+import { containsPersonalInformation, privacyMessage } from './privacy.js';
+
+const $ = id => document.getElementById(id);
+const loaded = loadState();
+let state = loaded.state;
+let savingWorks = loaded.available;
+let busy = false;
+let configChecked = false;
+let selectedKind = 'litter';
+const stageNames = ['Planted', 'Sprout', 'Seedling', 'Sapling', 'Growing', 'Full bloom'];
+
+function showSaveStatus() {
+  $('save-status').classList.toggle('error', !savingWorks);
+  $('save-status').querySelector('span').textContent = savingWorks
+    ? 'Saves on this computer only for now.'
+    : 'Browser saving is unavailable. Keep this page open; progress may be lost on refresh.';
+}
+
+function persist() {
+  savingWorks = saveState(state);
+  showSaveStatus();
+}
+
+function feedback(message, error = false) {
+  $('goal-feedback').textContent = message;
+  $('goal-feedback').classList.toggle('error', error);
+}
+
+function chatFeedback(message, locked = false) {
+  $('chat-feedback').textContent = message;
+  $('chat-feedback').hidden = !message;
+  $('chat-feedback').classList.toggle('locked', locked);
+}
+
+function updateChatControls() {
+  const locked = state.privacyStrikes >= 2;
+  $('question').disabled = locked || busy;
+  $('ask-button').disabled = locked || busy || !state.goal || !$('question').value.trim() || !configChecked;
+  $('ask-label').textContent = busy ? 'Thinking…' : locked ? 'AI closed' : 'Ask guide';
+  $('char-count').textContent = `${$('question').value.length} / 600`;
+  $('chat-form').setAttribute('aria-busy', String(busy));
+  document.body.classList.toggle('busy', busy);
+  document.querySelectorAll('[data-prompt]').forEach(button => { button.disabled = locked || busy; });
+  $('change-goal').disabled = busy;
+  $('new-goal').disabled = busy;
+  $('log-form').querySelectorAll('input, button').forEach(element => { element.disabled = busy; });
+  if (locked) chatFeedback(privacyMessage(2), true);
+}
+
+function updateGoalInput() {
+  selectedKind = $('goal-kind').value;
+  const type = goalTypes[selectedKind];
+  $('target-unit').textContent = type.unit;
+  $('goal-hint').textContent = type.hint;
+  $('goal-target').step = String(type.step);
+  $('goal-target').min = String(type.step);
+}
+
+function renderGoal() {
+  const goal = state.goal;
+  const percent = progress(goal);
+  const stage = treeStage(goal);
+  const complete = Boolean(goal && percent === 100);
+  if (complete && !state.shopUnlocked) { state.shopUnlocked = true; persist(); }
+  $('goal-form').hidden = Boolean(goal);
+  $('sample-section').hidden = Boolean(goal);
+  $('log-form').hidden = !goal || complete;
+  $('change-goal').hidden = !goal;
+  $('complete-message').hidden = !complete;
+  $('goal-form-title').textContent = goal ? 'Every little action counts' : 'Choose your small change';
+  $('tree-picture').dataset.stage = goal ? String(stage) : 'preview';
+  $('tree-picture').setAttribute('aria-label', goal ? `Your symbolic tree: ${stageNames[stage]}, ${percent} percent of your goal recorded` : 'Preview of the tree you can grow');
+  $('stage-badge').textContent = goal ? `${stageNames[stage]} · ${stage}/5` : 'Ready to plant';
+  $('garden-title').textContent = complete ? 'Look what your little steps grew.' : goal ? 'One little action at a time.' : 'A small start. A greener you.';
+  $('landscape-caption').textContent = !goal ? 'Imagine what a little care can grow.' : complete ? 'A small promise, beautifully kept.' : stage === 0 ? 'Every growing story starts with a seed.' : 'A little progress is still progress.';
+  $('progress-percent').replaceChildren(document.createTextNode(String(percent)));
+  const percentSymbol = document.createElement('span');
+  percentSymbol.textContent = '%';
+  $('progress-percent').append(percentSymbol);
+  $('growth-progress').value = percent;
+  $('growth-progress').textContent = `${percent}%`;
+  document.querySelectorAll('[data-milestone]').forEach(element => element.classList.toggle('reached', Boolean(goal && percent >= Number(element.dataset.milestone))));
+  if (goal) {
+    const type = goalTypes[goal.kind];
+    $('goal-label').textContent = type.label;
+    $('goal-count').textContent = `${goal.completed} of ${goal.target} ${type.unit} ${type.verb}`;
+    $('log-unit').textContent = type.unit;
+    $('log-amount').step = String(type.step);
+    $('log-amount').min = String(type.step);
+    $('log-amount').max = String(Math.round((goal.target - goal.completed) * 10) / 10);
+    $('log-amount').value = String(Math.min(1, Math.round((goal.target - goal.completed) * 10) / 10));
+    $('log-hint').textContent = type.hint;
+  } else {
+    $('goal-label').textContent = 'Your first goal is waiting';
+    $('goal-count').textContent = 'Plant a goal below to start your story.';
+  }
+  updateChatControls();
+  renderShop();
+  showSaveStatus();
+}
+
+function articleCard(article) {
+  const card = document.createElement('article');
+  card.className = `article-card color-${article.color}`;
+  const heading = document.createElement('div');
+  heading.className = 'article-card-heading';
+  const icon = document.createElement('span');
+  icon.className = 'article-icon';
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', 'icon');
+  const use = document.createElementNS('http://www.w3.org/1999/xlink', 'use');
+  use.setAttribute('href', `#${article.icon}`);
+  svg.append(use);
+  icon.append(svg);
+  const text = document.createElement('div');
+  const category = document.createElement('p');
+  category.className = 'article-category';
+  category.textContent = article.category;
+  const title = document.createElement('h3');
+  title.textContent = article.title;
+  text.append(category, title);
+  heading.append(icon, text);
+  const preview = document.createElement('p');
+  preview.className = 'article-preview';
+  preview.textContent = article.preview;
+  const open = document.createElement('button');
+  open.type = 'button';
+  open.className = 'article-open';
+  open.textContent = state.shopUnlocked ? 'Read the story' : 'Locked until your first tree is grown';
+  open.disabled = !state.shopUnlocked;
+  open.addEventListener('click', () => openArticle(article));
+  card.append(heading, preview, open);
+  return card;
+}
+
+function renderShop() {
+  const featured = state.goal ? featuredArticle(state.goal.kind) : null;
+  const visible = featured ? [featured, ...articles.map(a => a.id).filter(id => id !== featured)] : articles.map(a => a.id);
+  $('shop-state').textContent = state.shopUnlocked ? 'Open · Free' : 'Locked';
+  $('shop-state').classList.toggle('unlocked', state.shopUnlocked);
+  $('shop-description').textContent = state.shopUnlocked
+    ? 'Your first tree opened the shop. Every article is free, uses trusted facts, and connects to a real next step.'
+    : 'A few short, exciting true stories are waiting. Your first fully grown tree opens the door.';
+  $('shop-lock-note').textContent = state.shopUnlocked
+    ? 'Articles cannot be bought. No account, prices, or personal information are needed to read them.'
+    : 'The shop is a reward for finishing one goal. Keep going—one small action at a time.';
+  $('article-shelf').replaceChildren(...visible.map(id => articleCard(articles.find(article => article.id === id))));
+}
+
+function articleParagraph(text, className = '') {
+  const paragraph = document.createElement('p');
+  paragraph.textContent = text;
+  if (className) paragraph.className = className;
+  return paragraph;
+}
+
+function openArticle(article) {
+  const content = document.createElement('div');
+  content.className = `article-reader color-${article.color}`;
+  const label = document.createElement('p');
+  label.className = 'eyebrow';
+  label.textContent = article.category;
+  const title = document.createElement('h2');
+  title.textContent = article.title;
+  content.append(label, title, ...article.paragraphs.map(paragraph => articleParagraph(paragraph)));
+  const action = articleParagraph(article.action, 'article-action');
+  content.append(action);
+  const source = document.createElement('a');
+  source.href = article.source.url;
+  source.target = '_blank';
+  source.rel = 'noopener noreferrer';
+  source.textContent = `${article.source.title} ↗`;
+  content.append(articleParagraph('READ THE REAL SOURCE', 'article-source-label'), source);
+  const ask = document.createElement('button');
+  ask.type = 'button';
+  ask.className = 'article-question';
+  ask.textContent = 'Ask your guide about this';
+  ask.addEventListener('click', () => {
+    $('question').value = article.question;
+    updateChatControls();
+    $('info-dialog').close();
+    $('question').focus();
+    chatFeedback('Press the check mark to ask the AI about this article.');
+    document.querySelector('.guide-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  content.append(ask);
+  $('dialog-content').replaceChildren(content);
+  $('info-dialog').showModal();
+}
+
+for (const [value, type] of Object.entries(goalTypes)) {
+  const option = document.createElement('option');
+  option.value = value;
+  option.textContent = type.label;
+  $('goal-kind').append(option);
+}
+for (const sample of sampleGoals) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = sample.title;
+  button.title = `Made-up example: ${sample.description}`;
+  button.addEventListener('click', () => {
+    $('goal-kind').value = sample.kind;
+    $('goal-target').value = String(sample.target);
+    updateGoalInput();
+    feedback('Example loaded. Press “Plant my goal” to start at zero.');
+  });
+  $('samples').append(button);
+}
+$('goal-kind').addEventListener('change', updateGoalInput);
+$('goal-form').addEventListener('submit', event => {
+  event.preventDefault();
+  const goal = { kind: selectedKind, target: Number($('goal-target').value), completed: 0 };
+  if (!validGoal(goal)) return feedback('Choose a positive target up to 10,000. Use whole items, or tenths for kWh.', true);
+  state.goal = goal;
+  persist();
+  renderGoal();
+  feedback('Your goal is planted. Ask your guide for one safe first step.');
+  $('question').focus({ preventScroll: true });
+});
+$('log-form').addEventListener('submit', event => {
+  event.preventDefault();
+  if (busy) return;
+  const updated = addProgress(state.goal, Number($('log-amount').value));
+  if (!updated) return feedback('Enter a positive amount no larger than what is left in your goal.', true);
+  state.goal = updated;
+  persist();
+  renderGoal();
+  renderShop();
+  feedback(progress(updated) === 100 ? '100% recorded. Your tree is fully grown—the Growth Shop is open!' : `${progress(updated)}% recorded. Small steps count.`);
+});
+
+function showDialog(html) {
+  $('dialog-content').innerHTML = html;
+  $('info-dialog').showModal();
+}
+function confirmChange() {
+  if (busy) return;
+  showDialog('<h2>A fresh little start?</h2><p>This removes your current goal and its recorded progress from this browser. Your AI privacy warnings will stay. There is no pressure to start over.</p><div class="dialog-actions"><button class="danger-button" id="confirm-change">Clear goal and start again</button><button class="text-button" id="cancel-change">Keep my tree</button></div>');
+  $('cancel-change').addEventListener('click', () => $('info-dialog').close());
+  $('confirm-change').addEventListener('click', () => {
+    savingWorks = removeGoal(state);
+    state.goal = null;
+    $('chat-area').replaceChildren();
+    $('question').value = '';
+    renderGoal();
+    renderShop();
+    feedback('Choose a new goal when you feel ready.');
+    $('info-dialog').close();
+    $('goal-kind').focus();
+  });
+}
+$('change-goal').addEventListener('click', confirmChange);
+$('new-goal').addEventListener('click', confirmChange);
+$('close-dialog').addEventListener('click', () => $('info-dialog').close());
+$('how-button').addEventListener('click', () => showDialog('<h2>One goal. A little growth.</h2><ol><li><strong>Plant a goal.</strong> Choose something small and safe. The examples are made up; every new goal starts at zero.</li><li><strong>Ask your guide.</strong> Type a question and press the check mark. Only then does the server ask OpenAI, using your goal and the instructions in BRIEF.md.</li><li><strong>Take a safe step.</strong> Record what you actually did. Your tree grows at 20%, 40%, 60%, 80%, and 100%.</li><li><strong>Open the Growth Shop.</strong> Finish one goal and three free true-story articles become readable. Ask the guide about one of them anytime.</li></ol><p>The tree is a progress picture, not a real planted tree or proof of pollution prevented. Your goal saves only in this browser. Chats are not saved by this app.</p><p><strong>Made for small beginnings.</strong> No account, purchases, public rankings, or pressure. After your first tree reaches 100%, the Growth Shop opens and stays open on this computer. It contains only free, source-linked articles.</p>'));
+$('sources-button').addEventListener('click', () => showDialog('<h2>Real sources. Small steps.</h2><p>Our guide uses these checked sources, not a live web search. Older figures keep their original dates.</p><ul><li><a href="https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/national-overview-facts-and-figures-materials" target="_blank" rel="noopener noreferrer">EPA: everyday waste in the U.S.</a><br>292.4 million tons generated in 2018. This is not a measurement of litter.</li><li><a href="https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/plastics-material-specific-data" target="_blank" rel="noopener noreferrer">EPA: plastic recycling</a><br>8.7% of plastic municipal waste recycled in 2018. The rest did not all enter the ocean.</li><li><a href="https://marinedebris.noaa.gov/why-marine-debris-problem/ingestion" target="_blank" rel="noopener noreferrer">NOAA: plastic and wildlife</a><br>Eating plastic can injure animals and block their digestive systems.</li><li><a href="https://www.epa.gov/recycle/preventing-wasted-food-home" target="_blank" rel="noopener noreferrer">EPA: prevent wasted food at home</a><br>Plan around food you have before buying more.</li></ul><p>Existing tools such as Recycle Coach already help people recycle. Our prototype combines a personal goal, a tree, and guidance based on recorded progress. We have not proven it changes habits better than other tools.</p>'));
+
+$('question').addEventListener('input', updateChatControls);
+document.querySelectorAll('[data-prompt]').forEach(button => button.addEventListener('click', () => {
+  $('question').value = button.dataset.prompt;
+  updateChatControls();
+  $('question').focus();
+  if (!state.goal) chatFeedback('Plant your goal first, then press the check mark to ask.');
+}));
+
+async function recordPrivacyWarning() {
+  state.privacyStrikes = Math.min(2, state.privacyStrikes + 1);
+  $('question').value = '';
+  persist();
+  chatFeedback(privacyMessage(state.privacyStrikes), state.privacyStrikes >= 2);
+  updateChatControls();
+  try {
+    const response = await fetch('/api/privacy-warning', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}', signal: AbortSignal.timeout(5000) });
+    const data = await response.json();
+    if (Number.isInteger(data.privacyStrikes)) {
+      state.privacyStrikes = Math.max(state.privacyStrikes, data.privacyStrikes);
+      persist();
+    }
+  } catch {}
+  chatFeedback(privacyMessage(state.privacyStrikes), state.privacyStrikes >= 2);
+  updateChatControls();
+}
+
+$('chat-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (busy || state.privacyStrikes >= 2 || !configChecked) return;
+  if (!state.goal) return chatFeedback('Plant a goal first so your guide can help with your next step.');
+  const question = $('question').value.trim();
+  if (!question) return;
+  if (containsPersonalInformation(question)) {
+    busy = true;
+    try { await recordPrivacyWarning(); }
+    finally { busy = false; updateChatControls(); }
+    return;
+  }
+  busy = true;
+  chatFeedback('');
+  updateChatControls();
+  const userMessage = document.createElement('div');
+  userMessage.className = 'user-message';
+  userMessage.textContent = question;
+  const thinking = document.createElement('div');
+  thinking.className = 'thinking-message';
+  thinking.textContent = 'Thinking…';
+  $('chat-area').replaceChildren(userMessage, thinking);
+  try {
+    const response = await fetch('/api/ask', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question, goal: state.goal }), signal: AbortSignal.timeout(35000),
+    });
+    const data = await response.json();
+    thinking.remove();
+    if (!response.ok) {
+      if (Number.isInteger(data.privacyStrikes)) {
+        state.privacyStrikes = Math.max(state.privacyStrikes, data.privacyStrikes);
+        persist();
+        userMessage.remove();
+        $('question').value = '';
+      }
+      chatFeedback(data.error || 'The AI could not answer. Please check the key and internet connection with a trusted adult.', state.privacyStrikes >= 2);
+      return;
+    }
+    const answer = document.createElement('div');
+    answer.className = 'assistant-message';
+    const label = document.createElement('span');
+    label.className = 'message-eyebrow';
+    label.textContent = data.classification === 'off_topic' ? 'GREEN GUIDE · GENERAL NOTE' : 'YOUR GREEN GUIDE';
+    const text = document.createElement('p');
+    text.textContent = data.answer;
+    answer.append(label, text);
+    if (data.classification === 'off_topic') answer.append(articleParagraph('This is outside your current goal, but you can ask your guide to bring it back to your next step.', 'off-topic-note'));
+    if (data.sources?.length) {
+      const links = document.createElement('div');
+      links.className = 'source-links';
+      for (const source of data.sources) {
+        const url = new URL(source.url);
+        if (url.protocol !== 'https:' || !['www.epa.gov', 'marinedebris.noaa.gov'].includes(url.hostname)) continue;
+        const link = document.createElement('a');
+        link.href = source.url;
+        link.textContent = `${source.title} ↗`;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        links.append(link);
+      }
+      answer.append(links);
+    }
+    $('chat-area').append(answer);
+    $('question').value = '';
+    $('chat-area').scrollTop = $('chat-area').scrollHeight;
+  } catch {
+    thinking.remove();
+    chatFeedback('The AI could not answer. Please ask a trusted adult to check the key in .env and your internet connection, then try again.');
+  } finally {
+    busy = false;
+    updateChatControls();
+  }
+});
+
+async function checkConfig() {
+  try {
+    const response = await fetch('/api/config', { signal: AbortSignal.timeout(5000) });
+    if (!response.ok) throw new Error('SETUP_UNAVAILABLE');
+    const config = await response.json();
+    configChecked = true;
+    if (Number.isInteger(config.privacyStrikes) && config.privacyStrikes > state.privacyStrikes) {
+      state.privacyStrikes = Math.min(2, config.privacyStrikes);
+      persist();
+    }
+    $('connection-status').classList.toggle('unready', !config.ready);
+    $('connection-status').querySelector('span:last-child').textContent = config.ready
+      ? 'OpenAI configured · only answers when you ask'
+      : 'AI setup needed · add the local key and model';
+  } catch {
+    $('connection-status').classList.add('unready');
+    $('connection-status').querySelector('span:last-child').textContent = 'Local server unavailable · restart and refresh';
+    chatFeedback('Please start the local server and refresh. If the AI still cannot answer, ask an adult to check the key in .env.');
+  }
+  updateChatControls();
+}
+updateGoalInput();
+renderGoal();
+checkConfig();

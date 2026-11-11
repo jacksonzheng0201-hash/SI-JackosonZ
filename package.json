@@ -1,0 +1,14 @@
+{
+  "name": "de-pollution",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A small, local-first environmental goal garden with an OpenAI guide.",
+  "scripts": {
+    "start": "node server.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
