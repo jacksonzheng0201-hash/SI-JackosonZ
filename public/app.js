@@ -372,8 +372,8 @@ async function checkConfig() {
     }
     $('connection-status').classList.toggle('unready', !config.ready);
     $('connection-status').querySelector('span:last-child').textContent = config.ready
-      ? 'OpenAI configured · only answers when you ask'
-      : 'AI setup needed · add the local key and model';
+      ? `OpenAI ${config.model} ready · only answers when you ask`
+      : config.model ? `Model ${config.model} is set · add the key in .env` : 'AI setup needed · add the local key and model';
   } catch {
     $('connection-status').classList.add('unready');
     $('connection-status').querySelector('span:last-child').textContent = 'Local server unavailable · restart and refresh';

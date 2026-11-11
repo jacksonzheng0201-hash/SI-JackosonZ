@@ -12,9 +12,9 @@ Open http://127.0.0.1:4317. Stop with Ctrl+C. No package installation or databas
 
 ## AI setup
 
-OpenAI model: 
+OpenAI model: gpt-5.6-luna
 
-The model line above is deliberately blank: the existing NOTES.md and .env mentioned in the request were not present. The builder will supply them. Write the chosen model after `OpenAI model:`. Do not put a key here.
+Use the exact model name from OpenAI's model list on that line: no spaces, no extra words. The app reads only this one line, so a name typed with spaces (for example "gpt 5.0 Luna") is read as empty and the AI stays off. The chosen model is GPT-5.6 Luna, whose API name is `gpt-5.6-luna`. If OpenAI ever says this model is not available for your account, ask a trusted adult to check the exact name in your OpenAI account and update this line.
 
 The key belongs only in this folder’s `.env` as `OPENAI_API_KEY=...`. Never paste it into chat. The server reads it only from that file, not from the browser or inherited environment. `.env` is ignored by Git and is never served to the browser. Model/key changes are read on the next request; refresh the page to update the setup label. OpenAI API usage may cost money.
 
@@ -66,7 +66,7 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. 21/21 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path; it has not yet been called with a live key because `.env` and the model name are still missing. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 22/22 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path; it has not yet been called with a live key because this folder still has no `.env` file. The model name is now set to `gpt-5.6-luna`, and the page shows the exact model name it read. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
 
@@ -84,6 +84,6 @@ A local Git save point was created after browser saving passed. The private `.en
 
 1. With a trusted adult, revoke the leaked OpenAI key and create a new one.
 2. Copy `.env.example` to `.env`, then paste only the new key into `.env`.
-3. Replace the blank `OpenAI model:` line above with the exact model name shown in your OpenAI account.
+3. Check that the `OpenAI model:` line above still matches the exact model name shown in your OpenAI account.
 4. Restart the app and test one on-topic question, one off-topic question, one article question, and one unsafe/personal-information question using made-up data.
 5. Make another local Git save point after real AI works. Never commit `.env`.

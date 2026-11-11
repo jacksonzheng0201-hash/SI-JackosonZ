@@ -23,6 +23,14 @@ test('configuration comes from .env and the model line in NOTES.md', t => {
   writeFileSync(new URL('NOTES.md', root), '# Notes\nOpenAI model: \n');
   assert.equal(getAIConfig(root).ready, false);
   assert.equal(getAIConfig(root).model, '');
+  writeFileSync(new URL('NOTES.md', root), '# Notes\nOpenAI model: gpt 5.0 Luna\n');
+  assert.equal(getAIConfig(root).model, '');
+  assert.equal(getAIConfig(root).ready, false);
+});
+
+test('this project’s NOTES.md model line is one the app can read', () => {
+  const config = getAIConfig(new URL('../', import.meta.url));
+  assert.match(config.model, /^[a-zA-Z0-9][a-zA-Z0-9._:-]+$/, 'The "OpenAI model:" line must hold one exact API name with no spaces.');
 });
 
 test('each AI request uses the real adapter, brief system instructions and no chat storage', async t => {
