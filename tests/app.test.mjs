@@ -30,10 +30,10 @@ test('progress rejects negative, fractional item counts and over-reporting', () 
 });
 
 test('common personal details are blocked and safe goal questions are allowed', () => {
-  for (const text of ['My address is 123 Example Street', '123 Example Street', 'test@example.invalid', 'My name is Example Person', 'My school is Example School', 'I live at 123 Imaginary Road', '555-010-1234', 'password: not-a-real-password', 'test [at] example [dot] invalid']) {
+  for (const text of ['My address is 123 Example Street', '123 Example Street', 'test@example.invalid', 'My name is Example Person', 'My school is Example School', 'I go to Example Middle School', 'I live at 123 Imaginary Road', '555-010-1234', 'My phone number is 555 123 4567', '+1 800 555 0199', 'password: not-a-real-password', 'test [at] example [dot] invalid']) {
     assert.equal(containsPersonalInformation(text), true, text);
   }
-  for (const text of ['I collected 2 of 10 items. What next?', 'How can I reuse a bag?', 'In 2018, 8.7% of plastic waste was recycled.', 'How can I stop food waste?']) {
+  for (const text of ['I collected 2 of 10 items. What next?', 'How can I reuse a bag?', 'In 2018, 8.7% of plastic waste was recycled.', 'How can I stop food waste?', 'I go to the park near my house and pick up bottles.', 'I live in a small apartment building.', 'My school is out of recycling bags.', 'My number is 10 because that is my goal.', 'There is one good 1 way to reuse bags.', 'Is 2018 2019 or 1 2 3 4 5 6 7 8 a good target?', 'What is the secret to recycling more? My secret is reusing jars.']) {
     assert.equal(containsPersonalInformation(text), false, text);
   }
 });

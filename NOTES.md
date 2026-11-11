@@ -36,7 +36,7 @@ A key was pasted directly into chat. Treat it as compromised: revoke/delete it i
 - The brief’s “build and generate the website” wording is treated as the original builder task. Inside the finished website, the AI helps with environmental goals and honestly describes user-recorded progress; it does not claim to edit the website.
 - While waiting, the app says “Thinking…” and disables another request. The server also blocks overlapping requests and limits requests per session.
 - Replies are rendered as text, not executable HTML. Source links come from an allowlist of checked EPA and NOAA pages. The AI does not browse live sources.
-- Common personal details are checked in the browser and server. First detection warns; a second closes the AI space. The tree still works. Known matches are not sent to OpenAI. These checks are imperfect; an AI-detected detail may already have reached OpenAI. The interface clearly warns not to enter personal details.
+- Common personal details are checked in the browser and server. First detection warns; a second closes the AI space. The tree still works. Known matches are not sent to OpenAI. The checks look for identifying patterns (a real name after “my name is”, an address, a phone-shaped number, a named school, a key), so ordinary questions with numbers, ages, or kWh amounts are not treated as personal information. They are still imperfect; an AI-detected detail may already have reached OpenAI. The interface clearly warns not to enter personal details.
 - The AI lock persists in this browser, with a matching server-session safeguard. Clearing browser data or using a new browser can bypass a prototype lock; this is not identity verification or a complete child-privacy compliance system.
 - The app does not save chats, but submitted questions/goals are sent to OpenAI. `store: false` is used; this does not promise that OpenAI keeps no service logs. Have an adult review provider terms and COPPA requirements before children use a public version.
 - No account, analytics, precise location, camera, microphone, purchases, or public rankings. The server listens only on this computer.
@@ -69,6 +69,8 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 Implementation is ready for local browser and automated testing. 22/22 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path; it has not yet been called with a live key because this folder still has no `.env` file. The model name is now set to `gpt-5.6-luna`, and the page shows the exact model name it read. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
+
+Privacy check tuning on 2026-11-10: some ordinary questions were wrongly called personal information (“I live in a small apartment building”, “2018 2019”, “1 2 3 4 5 6 7 8”, “a good 1 way to reuse bags”, “the secret is…”). The checks now need a stronger signal, and both directions were re-tested: 21 personal-information examples still blocked, 22 ordinary goal questions pass. In the browser, a previously mis-flagged question now reaches the normal setup message with zero warnings, while a made-up address still warns on the first try.
 
 ## Maybe Later
 
