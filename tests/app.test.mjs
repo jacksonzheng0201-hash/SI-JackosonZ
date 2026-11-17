@@ -1,11 +1,32 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { goalTypes, validGoal, progress, treeStage, addProgress } from '../public/goals.js';
 import { articles, featuredArticle } from '../public/articles.js';
 import { containsPersonalInformation } from '../public/privacy.js';
 import { loadState, saveState, removeGoal } from '../public/storage.js';
 
 const goal = { kind: 'litter', target: 10, completed: 0 };
+
+test('the GitHub Pages entry opens public with a relative redirect and fallback link', async () => {
+  const entry = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+  assert.match(entry, /http-equiv="refresh" content="0; url=\.\/public\/"/);
+  assert.match(entry, /href="\.\/public\/"/);
+});
+
+test('page assets and home navigation stay inside a GitHub project path', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const assets = [...html.matchAll(/<(?:link|script)\b[^>]*(?:href|src)="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(assets, ['./favicon.svg', './style.css', './app.js']);
+  assert.match(html, /class="brand" href="\.\/"/);
+  assert.doesNotMatch(html, /(?:href|src)="\//);
+  for (const base of ['http://127.0.0.1:4317/', 'https://example.github.io/SI-JackosonZ/public/']) {
+    for (const asset of assets) {
+      assert.equal(new URL(asset, base).pathname, new URL(base).pathname + asset.slice(2));
+      assert.ok((await readFile(new URL(`../public/${asset.slice(2)}`, import.meta.url))).length > 0);
+    }
+  }
+});
 
 test('every tree milestone is reached at the right percentage', () => {
   for (let completed = 0; completed <= 10; completed++) {

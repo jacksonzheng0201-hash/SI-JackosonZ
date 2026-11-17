@@ -72,11 +72,17 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. 25/25 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 27/27 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
 
 Privacy check tuning on 2026-11-10: some ordinary questions were wrongly called personal information (“I live in a small apartment building”, “2018 2019”, “1 2 3 4 5 6 7 8”, “a good 1 way to reuse bags”, “the secret is…”). The checks now need a stronger signal, and both directions were re-tested: 21 personal-information examples still blocked, 22 ordinary goal questions pass. In the browser, a previously mis-flagged question now reaches the normal setup message with zero warnings, while a made-up address still warns on the first try.
+
+## GitHub Pages fix, 2026-11-16
+
+The repo already has GitHub Pages turned on, so the live site is https://jacksonzheng0201-hash.github.io/SI-JackosonZ/. It looked blank, unstyled and unclickable for two separate reasons: (1) the page asked for `/style.css` and `/app.js` from the site root, but Pages serves this project under the `/SI-JackosonZ/` path, so both requests returned 404, and (2) GitHub was showing only the `public/` folder of an earlier upload, so the folder layout did not match. Now every asset is referenced relative to the page (`./style.css`, `./app.js`, `./favicon.svg`, brand link `./`) and the repository root holds one tiny forwarding page that opens `./public/`, so Pages finds the app wherever the project path is.
+
+GitHub Pages only serves plain files. It cannot run `server.mjs`, so the hosted copy has no AI: the guide says plainly that the AI lives in the local app, the question box and quick prompts are disabled there, and nothing is ever sent or charged. Everything else works online — planting a goal, recording progress, the five tree stages, saving in that browser, and opening the Growth Shop articles with their real source links. The AI still runs from the project folder with `./start.sh`, which is the version to film. No key is uploaded: Pages serves the whole repository to anyone, so `.env` and `PASTE-KEY-HERE.txt` stay ignored, and the repository's own copy of `PASTE-KEY-HERE.txt` must still be deleted from GitHub and the key revoked in OpenAI.
 
 ## Maybe Later
 

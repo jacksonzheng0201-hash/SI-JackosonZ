@@ -1,0 +1,8 @@
+.env
+PASTE-KEY-HERE.txt
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+*.log
+coverage/

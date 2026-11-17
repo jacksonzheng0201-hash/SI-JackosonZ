@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#244d3c">
+  <meta name="description" content="A little less waste. A little more growth. Set a goal, ask your green guide, and grow a tree with small everyday actions.">
+  <title>De-Pollution — Your little impact garden</title>
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="stylesheet" href="./style.css">
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <svg class="icon-definitions" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 17C2 9 10 3 21 3c0 11-6 18-14 15M3 21 16 8"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4m-2-2h4"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6ZM8 12l3 3 5-6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 3 4 3 4v15s5-2 9 1c4-3 9-1 9-1V4s-5-2-9 1Zm0 0v15"/></symbol>
+  </defs></svg>
+  <a class="skip-link" href="#main">Skip to your garden</a>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="De-Pollution home"><span class="brand-mark"><svg class="icon"><use href="#i-leaf"/></svg></span>De-Pollution<span class="brand-period">.</span></a>
+    <nav aria-label="Main navigation"><a class="nav-active" href="#garden">My garden</a><button class="nav-button" id="how-button">How it works <svg class="icon small"><use href="#i-info"/></svg></button></nav>
+    <span class="local-pill"><span class="status-dot"></span> Your device. Your progress.</span>
+  </header>
+  <main id="main">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow"><span class="tiny-line"></span> LITTLE ACTIONS, LASTING HABITS</p><h1 id="page-title">Less waste.<br><em>More possibility.</em></h1><p class="intro-description">Make one small change. Get a little guidance.<br>Watch something good grow.</p></div>
+      <div class="intro-note"><span class="note-number">01 / YOUR OWN LITTLE IMPACT GARDEN</span><p>You don’t have to change<br>the world in a day.</p><span>Start with one thing you can do today.</span><svg class="note-sprig" viewBox="0 0 72 90" aria-hidden="true"><path d="M36 84V21M36 59C8 62 6 35 6 35c25 0 30 24 30 24ZM36 40c0-22 27-29 27-29 3 25-27 29-27 29ZM36 74c0-22 27-28 27-28 3 25-27 28-27 28"/></svg></div>
+    </section>
+    <div class="workspace">
+      <section class="garden-column" id="garden" aria-label="Your goal and tree">
+        <article class="garden-card">
+          <div class="card-heading"><div><p class="eyebrow">YOUR GROWING STORY</p><h2 id="garden-title">A small start. A greener you.</h2></div><span class="stage-badge" id="stage-badge">Ready to plant</span></div>
+          <div class="landscape-wrap">
+            <svg id="tree-picture" class="landscape" data-stage="preview" viewBox="0 0 640 320" role="img" aria-label="Preview of the tree you can grow">
+              <defs><linearGradient id="sky" x2="0" y2="1"><stop stop-color="#eff1e6"/><stop offset="1" stop-color="#f8f5e9"/></linearGradient><linearGradient id="canopy" x2="0.7" y2="1"><stop stop-color="#6d9262"/><stop offset="1" stop-color="#315e44"/></linearGradient></defs>
+              <rect width="640" height="320" fill="url(#sky)"/>
+              <circle cx="490" cy="71" r="37" fill="#efc679" opacity=".68"/>
+              <path d="M25 105h49m10 0h14m453 42h53m8 0h11" stroke="#cdd7c5" stroke-width="2" stroke-linecap="round"/>
+              <path d="M0 227C100 166 152 223 238 220S382 149 485 194s124 18 155 10v116H0Z" fill="#dbe2ce"/>
+              <path d="M0 267c104-50 190-2 310-34s223-8 330 17v70H0Z" fill="#c5d4b4"/>
+              <path d="M0 288c127-30 232-22 324-7s196-10 316-7v46H0Z" fill="#b1c4a0"/>
+              <ellipse cx="321" cy="281" rx="88" ry="11" fill="#567147" opacity=".16"/>
+              <g class="tree-grown">
+                <path d="m305 284 6-128h17l11 128Z" fill="#957451"/>
+                <path d="m319 232-51-50m55 22 51-48m-55 58-2-66" fill="none" stroke="#957451" stroke-width="10" stroke-linecap="round"/>
+                <path d="M235 199c-32-2-49-25-42-51-13-21-2-46 23-51-1-28 20-47 46-44 15-34 54-39 76-18 27-11 57 3 61 29 33-2 53 21 48 47 26 16 26 54 5 70-5 30-41 42-62 30-24 25-63 26-86 8-26 12-54 0-69-20Z" fill="url(#canopy)"/>
+                <path d="M219 114c2-21 20-36 41-31 13-31 39-34 61-19 10-19 35-20 53-6-10-28-36-33-57-20-22-14-48-4-55 15-24-1-47 20-46 44-23 5-29 28-22 46 4-16 11-23 25-29Z" fill="#89a873"/>
+                <path d="M404 109c28 5 29 25 21 43-12-11-28-11-38-3 5-20 8-30 17-40ZM244 146c20-12 41 1 39 20-23 5-34-3-39-20Z" fill="#86a471" opacity=".7"/>
+                <path d="m282 93 8 9m62-37-4 11m42 31-7 7m-138 10 9 2m68 37-6 9m55 8 8-6m-124 8 8 5" stroke="#b9cc92" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+                <g class="tree-fruit" fill="#ecc478"><circle cx="276" cy="125" r="6"/><circle cx="352" cy="117" r="6"/><circle cx="395" cy="174" r="5"/><circle cx="306" cy="192" r="5"/></g>
+              </g>
+              <g class="tree-seed"><ellipse cx="320" cy="278" rx="12" ry="7" fill="#8c6b49"/><path d="m314 276 8-3" stroke="#bc9771" stroke-width="2" stroke-linecap="round"/></g>
+              <g class="tree-sprout"><path d="M320 280v-48" stroke="#4e7750" stroke-width="5" stroke-linecap="round"/><path d="M319 259c-25 0-32-23-32-23 25-4 32 23 32 23" fill="#73996b"/><path d="M321 245c0-24 29-28 29-28 0 25-29 28-29 28" fill="#426e49"/></g>
+              <g fill="none" stroke="#6b895b" stroke-width="2" stroke-linecap="round"><path d="m102 278-2-9m2 9 5-6m434-6v-10m0 10-5-5m-362 36v-9m0 9 5-5m-110-42v-8"/></g>
+              <g fill="#f8efd3"><circle cx="171" cy="278" r="3"/><circle cx="460" cy="282" r="3"/><circle cx="535" cy="242" r="3"/></g>
+              <path d="M503 202c-9-14 3-20 13-14-1 10-5 14-13 14" fill="#78965b"/>
+            </svg>
+            <span class="landscape-caption" id="landscape-caption">Imagine what a little care can grow.</span>
+          </div>
+          <div class="growth-detail">
+            <div class="progress-heading"><div><span id="goal-label">Your first goal is waiting</span><p id="goal-count">Plant a goal below to start your story.</p></div><span class="progress-percent" id="progress-percent">0<span>%</span></span></div>
+            <progress id="growth-progress" max="100" value="0" aria-label="Progress toward your goal">0%</progress>
+            <ol class="milestones" aria-label="Tree growth milestones"><li data-milestone="20"><span></span>20%<small>Sprout</small></li><li data-milestone="40"><span></span>40%<small>Seedling</small></li><li data-milestone="60"><span></span>60%<small>Sapling</small></li><li data-milestone="80"><span></span>80%<small>Growing</small></li><li data-milestone="100"><span></span>100%<small>Full bloom</small></li></ol>
+            <p class="honest-note">A symbolic tree. Your recorded actions, not a verified climate measurement.</p>
+          </div>
+        </article>
+        <article class="goal-card" id="goal-card">
+          <div class="section-number">01</div><div class="goal-content"><div class="section-title"><h2 id="goal-form-title">Choose your small change</h2><button class="text-button" id="change-goal" hidden>Change goal</button></div>
+            <form id="goal-form"><div class="goal-inputs"><label>I'd like to<select id="goal-kind" name="kind"></select></label><label class="number-label">My target<input id="goal-target" name="target" type="number" min="1" max="10000" step="1" value="10" required inputmode="decimal"></label><span class="unit-label" id="target-unit">items</span><button class="primary-button" type="submit">Plant my goal <svg class="icon small"><use href="#i-arrow"/></svg></button></div><p class="input-hint" id="goal-hint"></p></form>
+            <div id="sample-section"><p class="sample-label">NEED AN IDEA? TRY A MADE-UP EXAMPLE</p><div class="sample-list" id="samples"></div></div>
+            <form id="log-form" hidden><p class="log-intro">Done a little good? Add what you actually did.</p><div class="log-inputs"><label for="log-amount" class="sr-only">Amount to add</label><input id="log-amount" type="number" min="1" step="1" value="1" required inputmode="decimal"><span id="log-unit">items</span><button type="submit" class="primary-button">Add progress <svg class="icon small"><use href="#i-check"/></svg></button></div><p class="input-hint" id="log-hint"></p></form>
+            <div class="complete-message" id="complete-message" hidden><h3>Look what you grew.</h3><p>Your first tree is fully grown, and the Growth Shop below is open. Take a moment—there’s no rush to plant another goal.</p><button class="text-button" id="new-goal">Plant another goal <svg class="icon small"><use href="#i-arrow"/></svg></button></div>
+            <p id="goal-feedback" class="feedback" role="status"></p>
+          </div>
+        </article>
+        <p class="save-status" id="save-status" role="status"><svg class="icon small"><use href="#i-shield"/></svg><span>Saves on this computer only for now.</span></p>
+      </section>
+      <aside class="guide-column" aria-label="AI guide and safety">
+        <section class="guide-card">
+          <div class="guide-heading"><span class="guide-mark"><svg class="icon"><use href="#i-spark"/></svg></span><div><p class="eyebrow">A LITTLE HELP ALONG THE WAY</p><h2>Your green guide</h2></div><span class="ai-label">AI</span></div>
+          <p class="guide-description">Turn “what can I do?” into one doable next step.</p>
+          <div class="connection-status" id="connection-status" role="status"><span class="status-dot"></span><span>Checking local AI setup…</span></div>
+          <div class="chat-area" id="chat-area" aria-live="polite" aria-atomic="false">
+            <div class="welcome-message"><span class="message-eyebrow">LET’S START SMALL</span><p>Plant your goal, then ask me a question. I’ll help you find a safe next step that fits your progress.</p><p class="welcome-small">You bring the action. I bring a little guidance.</p></div>
+          </div>
+          <div class="prompt-options" id="prompt-options"><span class="sample-label">NOT SURE WHAT TO ASK?</span><button type="button" data-prompt="What is one safe first step for my goal?">What’s one safe first step? <span>↗</span></button><button type="button" data-prompt="Why is reusing bags helpful, and can plastic bags go in the recycling bin?">What should I do with plastic bags? <span>↗</span></button></div>
+          <form id="chat-form"><label for="question" class="sr-only">Ask your green guide</label><div class="composer"><textarea id="question" rows="3" maxlength="600" placeholder="Ask about your goal…" aria-describedby="privacy-notice" required></textarea><div class="composer-bottom"><span id="char-count">0 / 600</span><button type="submit" id="ask-button" aria-label="Send question with check mark" disabled><span id="ask-label">Ask guide</span><svg class="icon"><use href="#i-check"/></svg></button></div></div><p class="privacy-notice" id="privacy-notice"><svg class="icon small"><use href="#i-shield"/></svg><span>No names, addresses, school names, or secrets. One warning; a second closes this AI space.</span></p></form>
+          <div id="chat-feedback" class="chat-feedback" role="alert" hidden></div>
+          <details class="privacy-details"><summary>What gets sent to the AI?</summary><p>Only your question, goal, and progress go through this computer’s server to OpenAI when you press the check mark. Chats are not saved by this app. OpenAI may keep service logs under its own policies. Our checks can miss personal details, so don’t include them.</p><p>The API key stays on the server. No accounts, camera, location access, or tracking tools are used here.</p></details>
+        </section>
+        <section class="difference-card"><span class="mini-icon"><svg class="icon"><use href="#i-leaf"/></svg></span><div><p class="eyebrow">MORE THAN A RECYCLING LOOKUP</p><h3>Your goal. Your next step.</h3><p>Recycling guides tell you where things go. This garden connects your own goal, AI guidance, and a little visible progress.</p></div></section>
+        <section class="safety-note"><svg class="icon"><use href="#i-shield"/></svg><div><h3>Good for the planet. Safe for you.</h3><p>Clean up with a trusted adult. Leave sharp or unknown trash alone. Check local recycling rules. Small, safe steps always come first.</p><button class="text-button" id="sources-button">The facts behind the garden <svg class="icon small"><use href="#i-arrow"/></svg></button></div></section>
+      </aside>
+    </div>
+    <section class="shop-card" aria-labelledby="shop-title">
+      <div class="shop-heading"><span class="guide-mark shop-mark"><svg class="icon"><use href="#i-book"/></svg></span><div><p class="eyebrow">THE GROWTH SHOP</p><h2 id="shop-title">Rewards made of curiosity, not purchases</h2></div><span class="shop-state" id="shop-state">Locked</span></div>
+      <p class="shop-description" id="shop-description">A few short, exciting true stories are waiting. Your first fully grown tree opens the door.</p>
+      <div class="article-shelf" id="article-shelf"></div>
+      <p class="shop-lock-note" id="shop-lock-note">The shop is a reward for finishing one goal. Keep going—one small action at a time.</p>
+    </section>
+    <footer><span>De-Pollution <span class="footer-divider">/</span> A little less waste. A little more growth.</span><span>VERSION 01 <span class="footer-divider">·</span> STUDENT-BUILT, EARTH-MINDED</span></footer>
+  </main>
+  <dialog id="info-dialog"><div class="dialog-header"><span class="eyebrow">DE-POLLUTION FIELD NOTES</span><button id="close-dialog" aria-label="Close dialog">×</button></div><div id="dialog-content"></div></dialog>
+</body>
+</html>

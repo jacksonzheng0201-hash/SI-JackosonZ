@@ -10,6 +10,7 @@ let savingWorks = loaded.available;
 let busy = false;
 let configChecked = false;
 let selectedKind = 'litter';
+const isGitHubPages = location.hostname.endsWith('.github.io');
 const stageNames = ['Planted', 'Sprout', 'Seedling', 'Sapling', 'Growing', 'Full bloom'];
 
 function showSaveStatus() {
@@ -37,13 +38,13 @@ function chatFeedback(message, locked = false) {
 
 function updateChatControls() {
   const locked = state.privacyStrikes >= 2;
-  $('question').disabled = locked || busy;
+  $('question').disabled = locked || busy || isGitHubPages;
   $('ask-button').disabled = locked || busy || !state.goal || !$('question').value.trim() || !configChecked;
-  $('ask-label').textContent = busy ? 'Thinking…' : locked ? 'AI closed' : 'Ask guide';
+  $('ask-label').textContent = busy ? 'Thinking…' : locked ? 'AI closed' : isGitHubPages ? 'AI unavailable here' : 'Ask guide';
   $('char-count').textContent = `${$('question').value.length} / 600`;
   $('chat-form').setAttribute('aria-busy', String(busy));
   document.body.classList.toggle('busy', busy);
-  document.querySelectorAll('[data-prompt]').forEach(button => { button.disabled = locked || busy; });
+  document.querySelectorAll('[data-prompt]').forEach(button => { button.disabled = locked || busy || isGitHubPages; });
   $('change-goal').disabled = busy;
   $('new-goal').disabled = busy;
   $('log-form').querySelectorAll('input, button').forEach(element => { element.disabled = busy; });
@@ -177,7 +178,8 @@ function openArticle(article) {
   const ask = document.createElement('button');
   ask.type = 'button';
   ask.className = 'article-question';
-  ask.textContent = 'Ask your guide about this';
+  ask.textContent = isGitHubPages ? 'AI guide is available in the local app' : 'Ask your guide about this';
+  ask.disabled = isGitHubPages;
   ask.addEventListener('click', () => {
     $('question').value = article.question;
     updateChatControls();
@@ -218,8 +220,8 @@ $('goal-form').addEventListener('submit', event => {
   state.goal = goal;
   persist();
   renderGoal();
-  feedback('Your goal is planted. Ask your guide for one safe first step.');
-  $('question').focus({ preventScroll: true });
+  feedback(isGitHubPages ? 'Your goal is planted. Take a safe step, then record what you did.' : 'Your goal is planted. Ask your guide for one safe first step.');
+  if (!isGitHubPages) $('question').focus({ preventScroll: true });
 });
 $('log-form').addEventListener('submit', event => {
   event.preventDefault();
@@ -361,6 +363,14 @@ $('chat-form').addEventListener('submit', async event => {
 });
 
 async function checkConfig() {
+  if (isGitHubPages) {
+    $('connection-status').classList.add('unready');
+    $('connection-status').querySelector('span:last-child').textContent = 'GitHub Pages · goals and articles work; AI is unavailable here';
+    $('chat-area').replaceChildren();
+    chatFeedback('GitHub Pages cannot run the AI server. You can still plant a goal, grow your tree, and unlock articles. Use the app running on your computer for AI guidance. Never upload an API key to GitHub.');
+    updateChatControls();
+    return;
+  }
   try {
     const response = await fetch('/api/config', { signal: AbortSignal.timeout(5000) });
     if (!response.ok) throw new Error('SETUP_UNAVAILABLE');
