@@ -86,7 +86,7 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
       if (session.requests >= 20) return json(429, { error: 'Let’s take a short break. You can ask again in about ten minutes.' });
       const aiConfig = configReader(projectRoot);
       if (!aiConfig.ready) {
-        const missing = [!aiConfig.key && 'the key in .env', !aiConfig.model && 'the model in NOTES.md'].filter(Boolean).join(' and ') || 'the AI setup';
+        const missing = [!aiConfig.key && 'the key in .env or PASTE-KEY-HERE.txt', !aiConfig.model && 'the model in NOTES.md'].filter(Boolean).join(' and ') || 'the AI setup';
         return json(503, { error: setupNeeded(missing) });
       }
       if (session.busy) return json(429, { error: 'Your guide is already thinking. Please wait for its answer.' });

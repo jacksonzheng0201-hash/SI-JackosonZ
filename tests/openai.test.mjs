@@ -30,10 +30,20 @@ test('configuration comes from .env and the model line in NOTES.md', t => {
 
 test('placeholder key wording is treated as no key, so the app never claims to be ready', t => {
   const { root } = fixture(t);
-  for (const value of ['paste-your-key-here', 'PASTE_YOUR_API_KEY', 'your key here', 'your_api_key', 'sk-real-looking-token-123456']) {
+  const cases = [['paste-your-key-here', false], ['PASTE_YOUR_API_KEY', false], ['your key here', false], ['your_api_key', false], ['fictional-lookalike-9f3a71', true]];
+  for (const [value, filled] of cases) {
     writeFileSync(new URL('.env', root), `OPENAI_API_KEY=${value}\n`);
-    assert.equal(getAIConfig(root).ready, value.startsWith('sk-'), value);
+    assert.equal(getAIConfig(root).ready, filled, value);
   }
+});
+
+test('the visible key file works when the hidden one is still a placeholder', t => {
+  const { root } = fixture(t);
+  writeFileSync(new URL('.env', root), 'OPENAI_API_KEY=paste-your-key-here\n');
+  assert.equal(getAIConfig(root).ready, false);
+  writeFileSync(new URL('PASTE-KEY-HERE.txt', root), 'OPENAI_API_KEY=fictional-helper-token\n');
+  assert.equal(getAIConfig(root).ready, true);
+  assert.equal(getAIConfig(root).key, 'fictional-helper-token');
 });
 
 test('this project’s NOTES.md model line is one the app can read', () => {

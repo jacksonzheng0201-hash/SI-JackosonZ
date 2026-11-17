@@ -9,14 +9,20 @@ export const sources = {
 };
 
 const unfilled = /^(?:paste|your|put|type|enter)[\s_-]*(?:your[\s_-]*)?(?:api[\s_-]*)?key(?:[\s_-]*here)?$/i;
+const keyFiles = ['.env', 'PASTE-KEY-HERE.txt'];
+
+function readKey(root) {
+  for (const file of keyFiles) {
+    let value = '';
+    try { value = parseEnv(readFileSync(new URL(file, root), 'utf8')).OPENAI_API_KEY?.trim() || ''; } catch {}
+    if (value && !unfilled.test(value)) return value;
+  }
+  return '';
+}
 
 export function getAIConfig(root) {
-  let key = '';
   let model = '';
-  try {
-    const value = parseEnv(readFileSync(new URL('.env', root), 'utf8')).OPENAI_API_KEY?.trim() || '';
-    key = unfilled.test(value) ? '' : value;
-  } catch {}
+  const key = readKey(root);
   try {
     const notes = readFileSync(new URL('NOTES.md', root), 'utf8');
     model = notes.match(/^\s*(?:-\s*)?(?:\*\*)?(?:OpenAI\s+)?model(?:\*\*)?\s*:\s*`?([a-zA-Z0-9][a-zA-Z0-9._:-]*)`?\s*$/im)?.[1] || '';

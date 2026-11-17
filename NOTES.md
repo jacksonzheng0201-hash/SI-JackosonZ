@@ -16,7 +16,7 @@ OpenAI model: gpt-5.6-luna
 
 Use the exact model name from OpenAI's model list on that line: no spaces, no extra words. The app reads only this one line, so a name typed with spaces (for example "gpt 5.0 Luna") is read as empty and the AI stays off. The chosen model is GPT-5.6 Luna, whose API name is `gpt-5.6-luna`. If OpenAI ever says this model is not available for your account, ask a trusted adult to check the exact name in your OpenAI account and update this line.
 
-The key belongs only in this folder’s `.env`, which holds one line: `OPENAI_API_KEY=paste-your-key-here`. Replace only the words `paste-your-key-here` with the real key and save. Placeholder wording such as “paste your key here” is counted as empty on purpose, so the app never claims to be ready or sends a doomed request. Never paste the key into chat, and the app never prints it. The server reads the key only from that file, not from the browser or inherited environment. `.env` is ignored by Git (`.gitignore` line 1) and is never served to the browser; only the blank `.env.example` is tracked. Model/key changes are read on the next request; refresh the page to update the setup label. While the key is empty the app says exactly which file is still empty and charges nothing. OpenAI API usage may cost money.
+The key belongs only in this folder’s `.env`, or in the visible `PASTE-KEY-HERE.txt` described below, each holding one line: `OPENAI_API_KEY=` followed by the key. Replace the placeholder words `paste-your-key-here` with the real key and save. Placeholder wording such as “paste your key here” is counted as empty on purpose, so the app never claims to be ready or sends a doomed request. Never paste the key into chat, and the app never prints it. The server reads the key only from those files, not from the browser or inherited environment. Both files are ignored by Git (`.gitignore` lines 1-2) and are never served to the browser; only the blank `.env.example` is tracked. Model/key changes are read on the next request; refresh the page to update the setup label. While the key is empty the app says exactly which file is still empty and charges nothing. Once a key is present, the page label reads “OpenAI gpt-5.6-luna ready”. OpenAI API usage may cost money.
 
 ## Security alert from 2026-11-10, again on 2026-11-16
 
@@ -24,7 +24,7 @@ A key was pasted directly into chat twice. Treat both as compromised: revoke/del
 
 Extra protection added 2026-11-16: a local save-point guard (`.git/hooks/pre-commit`) refuses to commit any file containing key-shaped text and never echoes the match. This guard is local to this folder; a pasted key still has to be revoked. The repository contains neither the `.env` file nor any key.
 
-Because the hidden `.env` file is easy to miss in the editor, the folder also offers a visible `PASTE-KEY-HERE.txt` (ignored by Git the same way). The key is pasted there, then copied into `.env` and the helper file is deleted, so the key text is never printed on screen or sent into chat.
+Because the hidden `.env` file is easy to miss in the editor, the app also accepts a visible `PASTE-KEY-HERE.txt` in this folder (ignored by Git on line 2, same as `.env`). The builder pastes the key into either file and saves; `.env` wins if both hold a key. Nothing is ever copied between them by the assistant — Qoder’s own safety rules block the assistant from moving a secret file, which is a protection, not a failure. The key text is never printed on screen or sent into chat, and placeholder wording such as “paste your key here” counts as empty so the app never claims to be ready.
 
 ## What’s done
 
@@ -70,7 +70,7 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. 24/24 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path; it has not yet been called with a live key because `.env` still holds the placeholder text instead of a key. The model name is now set to `gpt-5.6-luna`, and both the label and the answer area name the exact file that is still empty. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 25/25 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
 
