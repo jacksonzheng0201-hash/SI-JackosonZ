@@ -8,10 +8,15 @@ export const sources = {
   epaFood: { title: 'EPA · Waste less food at home', url: 'https://www.epa.gov/recycle/preventing-wasted-food-home' },
 };
 
+const unfilled = /^(?:paste|your|put|type|enter)[\s_-]*(?:your[\s_-]*)?(?:api[\s_-]*)?key(?:[\s_-]*here)?$/i;
+
 export function getAIConfig(root) {
   let key = '';
   let model = '';
-  try { key = parseEnv(readFileSync(new URL('.env', root), 'utf8')).OPENAI_API_KEY?.trim() || ''; } catch {}
+  try {
+    const value = parseEnv(readFileSync(new URL('.env', root), 'utf8')).OPENAI_API_KEY?.trim() || '';
+    key = unfilled.test(value) ? '' : value;
+  } catch {}
   try {
     const notes = readFileSync(new URL('NOTES.md', root), 'utf8');
     model = notes.match(/^\s*(?:-\s*)?(?:\*\*)?(?:OpenAI\s+)?model(?:\*\*)?\s*:\s*`?([a-zA-Z0-9][a-zA-Z0-9._:-]*)`?\s*$/im)?.[1] || '';

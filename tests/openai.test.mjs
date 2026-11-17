@@ -28,6 +28,14 @@ test('configuration comes from .env and the model line in NOTES.md', t => {
   assert.equal(getAIConfig(root).ready, false);
 });
 
+test('placeholder key wording is treated as no key, so the app never claims to be ready', t => {
+  const { root } = fixture(t);
+  for (const value of ['paste-your-key-here', 'PASTE_YOUR_API_KEY', 'your key here', 'your_api_key', 'sk-real-looking-token-123456']) {
+    writeFileSync(new URL('.env', root), `OPENAI_API_KEY=${value}\n`);
+    assert.equal(getAIConfig(root).ready, value.startsWith('sk-'), value);
+  }
+});
+
 test('this project’s NOTES.md model line is one the app can read', () => {
   const config = getAIConfig(new URL('../', import.meta.url));
   assert.match(config.model, /^[a-zA-Z0-9][a-zA-Z0-9._:-]+$/, 'The "OpenAI model:" line must hold one exact API name with no spaces.');
