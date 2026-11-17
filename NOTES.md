@@ -84,6 +84,8 @@ The repo already has GitHub Pages turned on, so the live site is https://jackson
 
 GitHub Pages only serves plain files. It cannot run `server.mjs`, so the hosted copy has no AI: the guide says plainly that the AI lives in the local app, the question box and quick prompts are disabled there, and nothing is ever sent or charged. Everything else works online — planting a goal, recording progress, the five tree stages, saving in that browser, and opening the Growth Shop articles with their real source links. The AI still runs from the project folder with `./start.sh`, which is the version to film. No key is uploaded: Pages serves the whole repository to anyone, so `.env` and `PASTE-KEY-HERE.txt` stay ignored, and the repository's own copy of `PASTE-KEY-HERE.txt` must still be deleted from GitHub and the key revoked in OpenAI.
 
+Push landed 2026-11-16: remote `main` moved `cdaa50c` → `d82bc3d` as an ordinary fast-forward on top of both earlier uploads, so nothing was overwritten and no history was rewritten. The visible file list is now the 20 project files (root `index.html`, `public/`, `tests/`, `.gitignore`, `.env.example`) and no key file. Checked in the live site: `https://jacksonzheng0201-hash.github.io/SI-JackosonZ/` forwards to `public/`, the style sheet and all five scripts return 200, 220 rules apply, planting a 3-item goal, recording it to 100%, opening the Growth Shop and reading the NOAA article all work, the guide says the AI lives in the local app, and the test progress was cleared afterwards so her first visit looks brand new. The key file is still readable inside the two earlier commits, so revoking it in OpenAI stays step 1.
+
 ## Maybe Later
 
 - More Growth Shop articles, teacher/student review, cosmetic plant accessories, and research on whether article reading increases goal completion.
@@ -96,8 +98,8 @@ GitHub Pages only serves plain files. It cannot run `server.mjs`, so the hosted 
 
 ## What’s next
 
-1. With a trusted adult, revoke the leaked OpenAI key and create a new one.
-2. Open `.env` in this folder, replace `paste-your-key-here` with the new key, and save. Nothing else needs changing.
-3. Confirm the page label turns “OpenAI gpt-5.6-luna ready · only answers when you ask”.
-4. Restart the app and test one on-topic question, one off-topic question, one article question, and one unsafe/personal-information question using made-up data.
-5. Make another local Git save point after real AI works. Never commit `.env`.
+1. With a trusted adult, revoke the leaked OpenAI key and create a new one — the file is gone from the list, but the two older commits still show it.
+2. With a trusted adult, delete `PASTE-KEY-HERE.txt` from inside those older commits on GitHub, or keep the repository private until the key is revoked.
+3. Open `PASTE-KEY-HERE.txt` in this folder, replace the old key with the new one, and save. Nothing else needs changing.
+4. Confirm http://127.0.0.1:4317 shows “OpenAI gpt-5.6-luna ready · only answers when you ask”.
+5. Test one on-topic question, one off-topic question, one article question, and one unsafe/personal-information question using made-up data, then make another local save point. Never commit `.env` or `PASTE-KEY-HERE.txt`.
