@@ -18,9 +18,11 @@ Use the exact model name from OpenAI's model list on that line: no spaces, no ex
 
 The key belongs only in this folder’s `.env`, which holds one line: `OPENAI_API_KEY=paste-your-key-here`. Replace only the words `paste-your-key-here` with the real key and save. Placeholder wording such as “paste your key here” is counted as empty on purpose, so the app never claims to be ready or sends a doomed request. Never paste the key into chat, and the app never prints it. The server reads the key only from that file, not from the browser or inherited environment. `.env` is ignored by Git (`.gitignore` line 1) and is never served to the browser; only the blank `.env.example` is tracked. Model/key changes are read on the next request; refresh the page to update the setup label. While the key is empty the app says exactly which file is still empty and charges nothing. OpenAI API usage may cost money.
 
-## Security alert from 2026-11-10
+## Security alert from 2026-11-10, again on 2026-11-16
 
-A key was pasted directly into chat. Treat it as compromised: revoke/delete it in OpenAI’s dashboard with a trusted adult, create a new key, and put only the new key in `.env`. Never paste a key into chat, email, screenshots, video, or NOTES.md. This repository does not contain that file or key.
+A key was pasted directly into chat twice. Treat both as compromised: revoke/delete them in OpenAI’s dashboard with a trusted adult, create a new key, and put only the new key in `.env`. The chat history on this computer keeps those messages, so deleting the text here is not enough — revoking the key is the real fix. Never paste a key into chat, email, screenshots, video, or NOTES.md. The builder’s own instructions say the key must never be printed, so the assistant will not copy a chat-pasted key into `.env` either.
+
+Extra protection added 2026-11-16: a local save-point guard (`.git/hooks/pre-commit`) refuses to commit any file containing key-shaped text and never echoes the match. This guard is local to this folder; a pasted key still has to be revoked. The repository contains neither the `.env` file nor any key.
 
 ## What’s done
 
