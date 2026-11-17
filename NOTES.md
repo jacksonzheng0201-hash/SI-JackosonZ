@@ -26,6 +26,8 @@ Extra protection added 2026-11-16: a local save-point guard (`.git/hooks/pre-com
 
 Because the hidden `.env` file is easy to miss in the editor, the app also accepts a visible `PASTE-KEY-HERE.txt` in this folder (ignored by Git on line 2, same as `.env`). The builder pastes the key into either file and saves; `.env` wins if both hold a key. Nothing is ever copied between them by the assistant — Qoder’s own safety rules block the assistant from moving a secret file, which is a protection, not a failure. The key text is never printed on screen or sent into chat, and placeholder wording such as “paste your key here” counts as empty so the app never claims to be ready.
 
+New finding on 2026-11-16 while getting the GitHub repo ready: that repo’s existing `main` branch (one commit named “Add files via upload”) already holds a file called `PASTE-KEY-HERE.txt` that is exactly the same size as the local file carrying the real key. The repo is public, so anyone on the internet could read it. That upload was made outside this folder, so it is not a Git save-point mistake — the file was added through GitHub’s own website. Fix order matters: (1) revoke the key in OpenAI with a trusted adult, because deleting the file later does not undo the exposure, (2) delete that file from the repo on GitHub, (3) only then push code. No local save point on `master` has ever contained `.env` or `PASTE-KEY-HERE.txt`, which was checked commit by commit before any push. The remote `main` and local `master` have unrelated histories, so pushing over `main` would either be refused or erase the already-uploaded files; the safe plan is a separate branch first, and no force-push.
+
 ## What’s done
 
 - BRIEF.md is the original, unchanged project brief and guides the build.
