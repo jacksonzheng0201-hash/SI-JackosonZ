@@ -24,6 +24,8 @@ A key was pasted directly into chat twice. Treat both as compromised: revoke/del
 
 Extra protection added 2026-11-16: a local save-point guard (`.git/hooks/pre-commit`) refuses to commit any file containing key-shaped text and never echoes the match. This guard is local to this folder; a pasted key still has to be revoked. The repository contains neither the `.env` file nor any key.
 
+Because the hidden `.env` file is easy to miss in the editor, the folder also offers a visible `PASTE-KEY-HERE.txt` (ignored by Git the same way). The key is pasted there, then copied into `.env` and the helper file is deleted, so the key text is never printed on screen or sent into chat.
+
 ## What’s done
 
 - BRIEF.md is the original, unchanged project brief and guides the build.
