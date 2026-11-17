@@ -100,7 +100,15 @@ test('missing setup does not create a fake answer or call the provider', async t
   const app = await setup(t, { configReader: () => ({ ready: false, model: '', key: '' }) });
   const result = await app.post('/api/ask', { question: 'What next?', goal });
   assert.equal(result.status, 503);
-  assert.match((await result.json()).error, /check the key/);
+  assert.match((await result.json()).error, /key in \.env.*model in NOTES\.md/);
+  assert.equal(app.calls(), 0);
+});
+
+test('a key with the model missing says only the model is empty', async t => {
+  const app = await setup(t, { configReader: () => ({ ready: false, model: '', key: 'fictional-test-token' }) });
+  const result = await app.post('/api/ask', { question: 'What next?', goal });
+  assert.equal(result.status, 503);
+  assert.match((await result.json()).error, /model in NOTES\.md is still empty/);
   assert.equal(app.calls(), 0);
 });
 

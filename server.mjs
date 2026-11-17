@@ -14,6 +14,7 @@ const staticFiles = new Map([
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']],
 ]);
 const unavailable = 'The AI could not answer. Please ask a trusted adult to check the key in .env, the model in NOTES.md, and your internet connection, then try again.';
+const setupNeeded = missing => `The AI is switched off because ${missing} ${missing.includes(' and ') ? 'are' : 'is'} still empty. Ask a trusted adult to add the value, save that file, then refresh this page. Your question was not sent and nothing was charged.`;
 
 export function createApp({ projectRoot = root, ai = askOpenAI, configReader = getAIConfig } = {}) {
   const sessions = new Map();
@@ -83,7 +84,11 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
       }
       if (now - session.window > 600000) { session.requests = 0; session.window = now; }
       if (session.requests >= 20) return json(429, { error: 'Let’s take a short break. You can ask again in about ten minutes.' });
-      if (!configReader(projectRoot).ready) return json(503, { error: unavailable });
+      const aiConfig = configReader(projectRoot);
+      if (!aiConfig.ready) {
+        const missing = [!aiConfig.key && 'the key in .env', !aiConfig.model && 'the model in NOTES.md'].filter(Boolean).join(' and ') || 'the AI setup';
+        return json(503, { error: setupNeeded(missing) });
+      }
       if (session.busy) return json(429, { error: 'Your guide is already thinking. Please wait for its answer.' });
       session.busy = true;
       session.requests += 1;
