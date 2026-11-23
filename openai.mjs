@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { parseEnv } from 'node:util';
+import { getKey, invalidateKey, KeygenError } from './keygen.mjs';
 
 export const sources = {
   epaWaste: { title: 'EPA · U.S. waste facts (2018)', url: 'https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/national-overview-facts-and-figures-materials' },
@@ -8,26 +8,24 @@ export const sources = {
   epaFood: { title: 'EPA · Waste less food at home', url: 'https://www.epa.gov/recycle/preventing-wasted-food-home' },
 };
 
-const unfilled = /^(?:paste|your|put|type|enter)[\s_-]*(?:your[\s_-]*)?(?:api[\s_-]*)?key(?:[\s_-]*here)?$/i;
-const keyFiles = ['.env', 'PASTE-KEY-HERE.txt'];
-
-function readKey(root) {
-  for (const file of keyFiles) {
-    let value = '';
-    try { value = parseEnv(readFileSync(new URL(file, root), 'utf8')).OPENAI_API_KEY?.trim() || ''; } catch {}
-    if (value && !unfilled.test(value)) return value;
+export async function checkKeygen(root, { fetchImpl = fetch, env = process.env } = {}) {
+  try {
+    await getKey({ root, fetchImpl, env });
+    return { keygenReady: true, keygenMessage: '', keygenFix: '' };
+  } catch (error) {
+    if (error instanceof KeygenError) return { keygenReady: false, keygenMessage: error.message, keygenFix: error.fix };
+    return { keygenReady: false, keygenMessage: 'The AI sign-in service could not be checked. Please try refreshing the page.', keygenFix: 'Ask a trusted adult to inspect the MindDo lookup-key response and server logs.' };
   }
-  return '';
 }
 
-export function getAIConfig(root) {
+export async function getAIConfig(root, keygenOptions = {}) {
   let model = '';
-  const key = readKey(root);
   try {
     const notes = readFileSync(new URL('NOTES.md', root), 'utf8');
     model = notes.match(/^\s*(?:-\s*)?(?:\*\*)?(?:OpenAI\s+)?model(?:\*\*)?\s*:\s*`?([a-zA-Z0-9][a-zA-Z0-9._:-]*)`?\s*$/im)?.[1] || '';
   } catch {}
-  return { key, model, ready: Boolean(key && model) };
+  const { keygenReady, keygenMessage, keygenFix } = await checkKeygen(root, keygenOptions);
+  return { model, keygenReady, keygenMessage, keygenFix, ready: Boolean(model && keygenReady) };
 }
 
 export function buildSystemInstructions(brief) {
@@ -62,13 +60,17 @@ Safety and factual rules:
 Respond with 2–4 short sentences, at most 110 words: acknowledge recorded progress, suggest one safe achievable next step, and include one relevant vetted fact when useful. sourceIds must cite only the supplied IDs supporting claims actually used. Do not put URLs or markdown links in the answer; the app supplies verified source links. Return the required JSON object.`;
 }
 
-export async function askOpenAI({ root, goal, goalContext = {}, question, fetchImpl = fetch }) {
-  const config = getAIConfig(root);
-  if (!config.ready) throw new Error('AI_NOT_CONFIGURED');
+export async function askOpenAI({ root, goal, goalContext = {}, question, fetchImpl = fetch, keyFetchImpl = fetchImpl, env = process.env }) {
+  const config = await getAIConfig(root, { fetchImpl: keyFetchImpl, env });
+  if (!config.ready) {
+    if (!config.keygenReady) throw new KeygenError(config.keygenMessage, config.keygenFix, 503);
+    throw new Error('AI_NOT_CONFIGURED');
+  }
   const system = buildSystemInstructions(readFileSync(new URL('BRIEF.md', root), 'utf8'));
-  const response = await fetchImpl('https://api.openai.com/v1/responses', {
+  let apiKey = await getKey({ root, fetchImpl: keyFetchImpl, env });
+  const request = async key => fetchImpl('https://api.openai.com/v1/responses', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${config.key}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     signal: AbortSignal.timeout(30000),
     body: JSON.stringify({
       model: config.model,
@@ -93,6 +95,16 @@ export async function askOpenAI({ root, goal, goalContext = {}, question, fetchI
       } },
     }),
   });
+  let response = await request(apiKey);
+  if (response.status === 401 || response.status === 403) {
+    const rejected = response;
+    if (invalidateKey(apiKey)) {
+      apiKey = await getKey({ root, fetchImpl: keyFetchImpl, env });
+      response = await request(apiKey);
+    } else {
+      response = rejected;
+    }
+  }
   if (!response.ok) throw new Error('AI_UNAVAILABLE');
   const data = await response.json();
   if (data.status && data.status !== 'completed') throw new Error('AI_INCOMPLETE');

@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { askOpenAI, getAIConfig } from './openai.mjs';
+import { KeygenError } from './keygen.mjs';
 import { containsPersonalInformation, privacyMessage } from './public/privacy.js';
 import { goalTypes, validGoal } from './public/goals.js';
 
@@ -13,11 +14,13 @@ const staticFiles = new Map([
   ...['app', 'goals', 'storage', 'privacy', 'articles'].map(name => [`/${name}.js`, [`${name}.js`, 'text/javascript']]),
   ['/favicon.svg', ['favicon.svg', 'image/svg+xml']],
 ]);
-const unavailable = 'The AI could not answer. Please ask a trusted adult to check the key in .env, the model in NOTES.md, and your internet connection, then try again.';
+const unavailable = 'The AI could not answer. Please ask a trusted adult to check the MindDo sign-in settings in .env, the model in NOTES.md, and your internet connection, then try again.';
+const providerFailure = error => error instanceof KeygenError ? error.message : unavailable;
 const setupNeeded = missing => `The AI is switched off because ${missing} ${missing.includes(' and ') ? 'are' : 'is'} still empty. Ask a trusted adult to add the value, save that file, then refresh this page. Your question was not sent and nothing was charged.`;
 
 export function createApp({ projectRoot = root, ai = askOpenAI, configReader = getAIConfig } = {}) {
   const sessions = new Map();
+  const keyLog = fix => console.error(`[minddo-fix] ${fix}`);
   const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'no-referrer');
@@ -51,7 +54,7 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
           sessions.set(id, session);
           res.setHeader('Set-Cookie', `dp_session=${id}; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400`);
         }
-        const config = configReader(projectRoot);
+        const config = await configReader(projectRoot);
         return json(200, { ready: config.ready, model: config.model, privacyStrikes: session.strikes });
       }
       if (req.method !== 'POST') return json(405, { error: 'That action is not available.' });
@@ -84,10 +87,16 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
       }
       if (now - session.window > 600000) { session.requests = 0; session.window = now; }
       if (session.requests >= 20) return json(429, { error: 'Let’s take a short break. You can ask again in about ten minutes.' });
-      const aiConfig = configReader(projectRoot);
+      const aiConfig = await configReader(projectRoot);
       if (!aiConfig.ready) {
-        const missing = [!aiConfig.key && 'the key in .env or PASTE-KEY-HERE.txt', !aiConfig.model && 'the model in NOTES.md'].filter(Boolean).join(' and ') || 'the AI setup';
-        return json(503, { error: setupNeeded(missing) });
+        if (!aiConfig.model && !aiConfig.keygenReady) {
+          if (aiConfig.keygenFix) keyLog(aiConfig.keygenFix);
+          return json(503, { error: `${setupNeeded('the model in NOTES.md')} ${aiConfig.keygenMessage}` });
+        }
+        const missing = !aiConfig.model ? 'the model in NOTES.md' : 'KEYGEN_URL or KEYGEN_TOKEN in .env';
+        if (aiConfig.keygenFix) keyLog(aiConfig.keygenFix);
+        const message = aiConfig.keygenReady || !aiConfig.keygenMessage ? setupNeeded(missing) : aiConfig.keygenMessage;
+        return json(503, { error: message });
       }
       if (session.busy) return json(429, { error: 'Your guide is already thinking. Please wait for its answer.' });
       session.busy = true;
@@ -107,8 +116,9 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
         if (!['goal', 'off_topic'].includes(result.classification)) return json(502, { error: 'The guide could not safely categorize that question. Please try asking about your goal again.' });
         if (containsPersonalInformation(result.answer)) return json(502, { error: 'The reply did not pass our privacy check. Please ask a different question without personal details.' });
         return json(200, { answer: result.answer, sources: result.sources, classification: result.classification });
-      } catch {
-        return json(503, { error: unavailable });
+      } catch (error) {
+        if (typeof error?.fix === 'string') keyLog(error.fix);
+        return json(503, { error: providerFailure(error) });
       } finally {
         session.busy = false;
       }
@@ -116,7 +126,7 @@ export function createApp({ projectRoot = root, ai = askOpenAI, configReader = g
       if (!res.headersSent) json(500, { error: 'Something went wrong. Please refresh the page and try again.' });
     }
   });
-  server.requestTimeout = 40000;
+  server.requestTimeout = 60000;
   return server;
 }
 
@@ -130,6 +140,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   });
   server.listen(4317, '127.0.0.1', () => {
     console.log('De-Pollution is running at http://127.0.0.1:4317');
-    console.log('Your API key stays on the server. Press Ctrl+C to stop.');
+    console.log('MindDo and OpenAI details stay on the server. Press Ctrl+C to stop.');
   });
 }

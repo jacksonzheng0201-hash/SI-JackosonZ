@@ -312,7 +312,7 @@ $('chat-form').addEventListener('submit', async event => {
   try {
     const response = await fetch('/api/ask', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ question, goal: state.goal }), signal: AbortSignal.timeout(35000),
+      body: JSON.stringify({ question, goal: state.goal }), signal: AbortSignal.timeout(55000),
     });
     const data = await response.json();
     thinking.remove();
@@ -355,7 +355,7 @@ $('chat-form').addEventListener('submit', async event => {
     $('chat-area').scrollTop = $('chat-area').scrollHeight;
   } catch {
     thinking.remove();
-    chatFeedback('The AI could not answer. Please ask a trusted adult to check the key in .env and your internet connection, then try again.');
+    chatFeedback('The AI could not answer. Please ask a trusted adult to check the MindDo settings in .env and your internet connection, then try again.');
   } finally {
     busy = false;
     updateChatControls();
@@ -383,11 +383,11 @@ async function checkConfig() {
     $('connection-status').classList.toggle('unready', !config.ready);
     $('connection-status').querySelector('span:last-child').textContent = config.ready
       ? `OpenAI ${config.model} ready · only answers when you ask`
-      : config.model ? `Model ${config.model} is set · add your key to PASTE-KEY-HERE.txt` : 'AI setup needed · add the local key and model';
+      : config.model ? `Model ${config.model} is set · add KEYGEN_URL and KEYGEN_TOKEN to .env` : 'AI setup needed · add the model and MindDo settings';
   } catch {
     $('connection-status').classList.add('unready');
     $('connection-status').querySelector('span:last-child').textContent = 'Local server unavailable · restart and refresh';
-    chatFeedback('Please start the local server and refresh. If the AI still cannot answer, ask an adult to check the key in .env.');
+    chatFeedback('Please start the local server and refresh. If the AI still cannot answer, ask an adult to check the MindDo settings in .env.');
   }
   updateChatControls();
 }
