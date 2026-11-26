@@ -47,6 +47,19 @@ test('progress and tree transitions stay smooth and respect reduced motion', asy
   assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\*,\*::before,\*::after\{animation:none!important;transition:none!important;scroll-behavior:auto!important\}\}/);
 });
 
+test('uplifting copy changes with the tree while progress stays factual', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const app = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(html, /<p class="uplift-note" id="uplift-note">/);
+  assert.match(html, /A symbolic tree\. Your recorded actions, not a verified climate measurement\./);
+  assert.match(app, /\$\('uplift-note'\)\.textContent = encouragement\[goal \? stage \+ 1 : 0\]/);
+  assert.match(app, /Your first sprout is here\. Small steps really do add up\./);
+  assert.match(app, /You’re more than halfway there\. Keep going—you’ve got this\./);
+  assert.match(app, /You did it\. Your care and consistency turned a small goal into something beautiful\./);
+  assert.match(css, /\.uplift-note\{[^}]*background:#eef3e8/);
+});
+
 test('the Growth Shop includes free articles and the leaf-powered comic shelf', async () => {
   const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
   assert.match(html, /id="article-shelf"/);

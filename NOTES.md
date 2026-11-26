@@ -86,6 +86,12 @@ The requested goal feature works fully. A clean-browser test planted a 10-item l
 
 The requested progress-and-tree feature works fully. An isolated browser test planted a 10-item litter goal and recorded 2 items at a time. At 20%, 40%, 60%, 80%, and 100%, the custom bar, accessible value, milestone markers, stage badge, and tree artwork all matched the recorded percentage. The seed changed to a sprout at 20%, the growing tree enlarged through the middle stages, and fruit appeared at 100%. The Growth Shop stayed locked until 100%. A fresh page load kept the completed goal, 10 earned leaves, and open shop. All 44 automated tests pass, the page had no console errors or warnings, and no AI question was sent. Test progress was isolated from the builder’s real browser save. No production repair was needed.
 
+## Uplifting copy, 2026-11-26
+
+The garden now shows a short encouraging sentence before a goal is planted and a new stage-specific message after planting and at every tree stage. The planting confirmation ends with “You’ve got this,” and the locked Growth Shop invites the user to keep taking small steps. The factual progress bar, accessible values, safety note, AI behavior, leaf rewards, and shop rules did not change.
+
+Verification on 2026-11-26: 45/45 tests pass. An isolated browser check saw the encouragement change at 0%, 20%, 40%, 60%, 80%, and 100%; confirmed exact progress and the shop opening only at 100%; and kept the completed goal, 10 leaves, open shop, and final message after a fresh page load. The new message was visible without horizontal overflow, there were no console errors or warnings, and no AI question was sent. Test progress was isolated from the builder’s real browser save.
+
 ## Progress display and comic removal (historical), 2026-11-25
 
 The large percentage-number display was removed so it can no longer look out of line with the bar. The goal label, action count, and milestone percentages remain. The custom bar eases to the recorded percentage over 0.35 seconds, then matches it exactly; its accessible value and text report that same percentage.

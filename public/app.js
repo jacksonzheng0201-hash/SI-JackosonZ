@@ -12,6 +12,15 @@ let configChecked = false;
 let selectedKind = 'litter';
 const isGitHubPages = location.hostname.endsWith('.github.io');
 const stageNames = ['Planted', 'Sprout', 'Seedling', 'Sapling', 'Growing', 'Full bloom'];
+const encouragement = [
+  'Every big change starts with one small choice. You can take the first one today.',
+  'Your goal is planted. Every small action from here is a real win.',
+  'Your first sprout is here. Small steps really do add up.',
+  'Look at that growth. Your steady choices are becoming a habit.',
+  'You’re more than halfway there. Keep going—you’ve got this.',
+  'Your tree is almost full bloom. One more small step will get you there.',
+  'You did it. Your care and consistency turned a small goal into something beautiful.',
+];
 
 function showSaveStatus() {
   $('save-status').classList.toggle('error', !savingWorks);
@@ -82,6 +91,7 @@ function renderGoal() {
   $('stage-badge').textContent = goal ? `${stageNames[stage]} · ${stage}/5` : 'Ready to plant';
   $('garden-title').textContent = complete ? 'Look what your little steps grew.' : goal ? 'One little action at a time.' : 'A small start. A greener you.';
   $('landscape-caption').textContent = !goal ? 'Imagine what a little care can grow.' : complete ? 'A small promise, beautifully kept.' : stage === 0 ? 'Every growing story starts with a seed.' : 'A little progress is still progress.';
+  $('uplift-note').textContent = encouragement[goal ? stage + 1 : 0];
   $('growth-progress').setAttribute('aria-valuenow', String(percent));
   $('growth-progress').setAttribute('aria-valuetext', `${percent}%`);
   $('growth-progress-fill').style.width = `${percent}%`;
@@ -146,7 +156,7 @@ function renderShop() {
   $('shop-state').classList.toggle('unlocked', state.shopUnlocked);
   $('shop-description').textContent = state.shopUnlocked
     ? 'Your first tree opened the shop. Articles stay free, and eco comics can be collected with leaves you earned by recording safe progress.'
-    : 'Free true stories and little green comics are waiting. Your first fully grown tree opens the door.';
+    : 'Free true stories and little green comics are waiting. Keep taking small steps—your first fully grown tree will open the door.';
   $('shop-lock-note').textContent = state.shopUnlocked
     ? 'Articles stay free. Comics use earned leaves only—never real money or personal information.'
     : 'Finish one goal to open free articles and leaf-powered comics. Keep going—one small action at a time.';
@@ -332,7 +342,7 @@ $('goal-form').addEventListener('submit', event => {
   state.goal = goal;
   persist();
   renderGoal();
-  feedback(isGitHubPages ? 'Your goal is planted. Take a safe step, then record what you did.' : 'Your goal is planted. Ask your guide for one safe first step.');
+  feedback(isGitHubPages ? 'Your goal is planted. Take a safe step, then record what you did. You’ve got this.' : 'Your goal is planted. Ask your guide for one safe first step. You’ve got this.');
   if (!isGitHubPages) $('question').focus({ preventScroll: true });
 });
 $('log-form').addEventListener('submit', event => {
