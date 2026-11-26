@@ -82,6 +82,10 @@ A local Git save point was created after browser saving passed. The private `.en
 
 The requested goal feature works fully. A clean-browser test planted a 10-item litter goal, recorded 2 items at a time, saw the tree reach 20%, 40%, 60%, 80%, and 100%, and confirmed the Growth Shop opened only at 100%. Refreshing kept the goal and progress. All three article buttons unlocked, and the wildlife article opened with its real NOAA source link. Starting another goal kept the shop open. A separate 0.3 kWh electricity goal accepted 0.1 kWh steps and reached 100%. The real local app also loaded the builder’s existing completed goal with a full tree and open shop, without changing that saved progress. No production repair was needed; regression tests now cover every goal type reaching full bloom through valid steps.
 
+## 20% tree-growth re-check, 2026-11-26
+
+The requested progress-and-tree feature works fully. An isolated browser test planted a 10-item litter goal and recorded 2 items at a time. At 20%, 40%, 60%, 80%, and 100%, the custom bar, accessible value, milestone markers, stage badge, and tree artwork all matched the recorded percentage. The seed changed to a sprout at 20%, the growing tree enlarged through the middle stages, and fruit appeared at 100%. The Growth Shop stayed locked until 100%. A fresh page load kept the completed goal, 10 earned leaves, and open shop. All 44 automated tests pass, the page had no console errors or warnings, and no AI question was sent. Test progress was isolated from the builder’s real browser save. No production repair was needed.
+
 ## Progress display and comic removal (historical), 2026-11-25
 
 The large percentage-number display was removed so it can no longer look out of line with the bar. The goal label, action count, and milestone percentages remain. The custom bar eases to the recorded percentage over 0.35 seconds, then matches it exactly; its accessible value and text report that same percentage.
