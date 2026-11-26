@@ -82,12 +82,9 @@ function renderGoal() {
   $('stage-badge').textContent = goal ? `${stageNames[stage]} · ${stage}/5` : 'Ready to plant';
   $('garden-title').textContent = complete ? 'Look what your little steps grew.' : goal ? 'One little action at a time.' : 'A small start. A greener you.';
   $('landscape-caption').textContent = !goal ? 'Imagine what a little care can grow.' : complete ? 'A small promise, beautifully kept.' : stage === 0 ? 'Every growing story starts with a seed.' : 'A little progress is still progress.';
-  $('progress-percent').replaceChildren(document.createTextNode(String(percent)));
-  const percentSymbol = document.createElement('span');
-  percentSymbol.textContent = '%';
-  $('progress-percent').append(percentSymbol);
-  $('growth-progress').value = percent;
-  $('growth-progress').textContent = `${percent}%`;
+  $('growth-progress').setAttribute('aria-valuenow', String(percent));
+  $('growth-progress').setAttribute('aria-valuetext', `${percent}%`);
+  $('growth-progress-fill').style.width = `${percent}%`;
   document.querySelectorAll('[data-milestone]').forEach(element => element.classList.toggle('reached', Boolean(goal && percent >= Number(element.dataset.milestone))));
   if (goal) {
     const type = goalTypes[goal.kind];

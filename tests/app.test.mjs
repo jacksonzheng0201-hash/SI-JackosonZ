@@ -28,6 +28,34 @@ test('page assets and home navigation stay inside a GitHub project path', async 
   }
 });
 
+test('progress uses the exact accessible custom bar without the large number line', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  const app = await readFile(new URL('../public/app.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(html, /id="progress-percent"|<progress\b/);
+  assert.match(html, /<div id="growth-progress" class="growth-progress" role="progressbar"[^>]*aria-valuemin="0"[^>]*aria-valuemax="100"[^>]*aria-valuenow="0"><span id="growth-progress-fill" class="growth-progress-fill"><\/span><\/div>/);
+  assert.match(app, /\$\('growth-progress'\)\.setAttribute\('aria-valuenow', String\(percent\)\)/);
+  assert.match(app, /\$\('growth-progress'\)\.setAttribute\('aria-valuetext', `\$\{percent\}%`\)/);
+  assert.match(app, /\$\('growth-progress-fill'\)\.style\.width = `\$\{percent\}%`/);
+});
+
+test('progress and tree transitions stay smooth and respect reduced motion', async () => {
+  const css = await readFile(new URL('../public/style.css', import.meta.url), 'utf8');
+  assert.match(css, /\.growth-progress-fill\{[^}]*transition:width \.35s cubic-bezier\(\.22,1,\.36,1\)/);
+  assert.match(css, /\.tree-grown\{[^}]*transition:transform \.9s cubic-bezier\(\.22,1,\.36,1\),opacity \.4s ease/);
+  assert.match(css, /\.tree-seed,\.tree-sprout\{[^}]*transition:transform \.5s cubic-bezier\(\.22,1,\.36,1\),opacity \.35s ease/);
+  assert.match(css, /\.tree-fruit\{[^}]*transition:opacity \.5s ease \.2s/);
+  assert.match(css, /@media\(prefers-reduced-motion:reduce\)\{\*,\*::before,\*::after\{animation:none!important;transition:none!important;scroll-behavior:auto!important\}\}/);
+});
+
+test('the Growth Shop includes free articles and the leaf-powered comic shelf', async () => {
+  const html = await readFile(new URL('../public/index.html', import.meta.url), 'utf8');
+  assert.match(html, /id="article-shelf"/);
+  assert.match(html, /class="comic-shop"/);
+  assert.match(html, /id="leaf-balance" aria-live="polite"/);
+  assert.match(html, /id="comic-shelf"/);
+  assert.match(html, /id="comic-feedback" role="status"/);
+});
+
 test('every tree milestone is reached at the right percentage', () => {
   for (let completed = 0; completed <= 10; completed++) {
     assert.equal(progress({ ...goal, completed }), completed * 10);
