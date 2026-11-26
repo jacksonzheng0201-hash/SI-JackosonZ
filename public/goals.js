@@ -30,6 +30,12 @@ export function treeStage(goal) {
   return Math.floor(progress(goal) / 20);
 }
 
+export function leavesForProgress(before, after) {
+  const start = Number.isFinite(before) ? Math.min(100, Math.max(0, Math.floor(before))) : 0;
+  const end = Number.isFinite(after) ? Math.min(100, Math.max(0, Math.floor(after))) : 0;
+  return Math.max(0, Math.floor(end / 10) - Math.floor(start / 10));
+}
+
 export function addProgress(goal, quantity) {
   if (!validGoal(goal) || !Number.isFinite(quantity) || quantity <= 0) return null;
   const updated = { ...goal, completed: Math.round((goal.completed + quantity) * 10) / 10 };

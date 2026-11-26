@@ -36,7 +36,7 @@ New finding on 2026-11-16 while getting the GitHub repo ready: that repo’s exi
 - One goal at a time: collect litter, reuse materials, save food, save measured electricity, or avoid single-use items. “Prevent litter” is an item count, not an estimate of total pollution.
 - A symbolic tree grows at 20%, 40%, 60%, 80%, and 100%. Only actions entered by the user count; the AI cannot add progress.
 - Three made-up example goals contain no real people and start at zero when planted.
-- The free Growth Shop unlocks permanently when the first tree reaches 100%. It has three source-linked articles, one goal-focused first, and no purchases, accounts, or personal-information requests.
+- The Growth Shop unlocks permanently when the first tree reaches 100%. It keeps three free, source-linked articles and adds three original eco comics about reuse, food waste, and wildlife. Comics cost 4–6 leaves; one leaf is earned for each 10% of goal progress recorded. Leaves and owned comics save in this browser. There are no real-money purchases, accounts, or personal-information requests.
 - Every AI question is classified as `goal` or `off_topic` using the active goal label and safety hint. On-topic answers respond to the actual question; off-topic answers are brief and warmly invite a goal-related question. Safety rules take precedence.
 - All browser saving is in `public/storage.js`. Goals, privacy-warning counts, and permanent Growth Shop unlock are saved; chats are not.
 - Saves on this computer only for now. More precisely, data stays in this browser and local address. Clearing browser data removes it. Browser data is not encrypted and people sharing the same browser profile can see it.
@@ -47,7 +47,7 @@ New finding on 2026-11-16 while getting the GitHub repo ready: that repo’s exi
 - Common personal details are checked in the browser and server. First detection warns; a second closes the AI space. The tree still works. Known matches are not sent to OpenAI. The checks look for identifying patterns (a real name after “my name is”, an address, a phone-shaped number, a named school, a key), so ordinary questions with numbers, ages, or kWh amounts are not treated as personal information. They are still imperfect; an AI-detected detail may already have reached OpenAI. The interface clearly warns not to enter personal details.
 - The AI lock persists in this browser, with a matching server-session safeguard. Clearing browser data or using a new browser can bypass a prototype lock; this is not identity verification or a complete child-privacy compliance system.
 - The app does not save chats, but submitted questions/goals are sent to OpenAI. `store: false` is used; this does not promise that OpenAI keeps no service logs. Have an adult review provider terms and COPPA requirements before children use a public version.
-- No account, analytics, precise location, camera, microphone, purchases, or public rankings. The server listens only on this computer.
+- No account, analytics, precise location, camera, microphone, real-money purchases, or public rankings. The server listens only on this computer.
 
 ## Evidence and honest differences
 
@@ -67,14 +67,14 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 3. Show “Thinking…” and the answer with its source, if a factual source was used.
 4. In a clearly labelled demonstration, enter 2 items: the tree reaches 20%. Only enter actual actions during real use.
 5. Refresh: the goal and 20% progress remain, but the chat does not.
-6. Add progress until 100%. Show all five tree stages, then scroll to the Growth Shop as it changes from Locked to Open. Open one article and show its source link.
+6. Add progress until 100%. Show all five tree stages and the leaves earned, then scroll to the Growth Shop as it changes from Locked to Open. Open one free article and show its source link. Buy one comic with leaves and read its three panels.
 7. Press “Ask your guide about this,” then press the check mark. Show the classification label and answer.
 8. Refresh: the goal/shop unlock remains, but the chat does not.
 9. Test safety separately using made-up details only. First input like “My address is 123 Example Street” warns; a second closes AI. Do not use real details. This locks that browser’s AI space, so do not do it in the same browser before filming the normal flow.
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. 35/35 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 37/37 tests pass, and browser testing confirmed planting, 100% progress, leaf earning, comic buying and reading, purchase persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
 
@@ -82,19 +82,23 @@ A local Git save point was created after browser saving passed. The private `.en
 
 The requested goal feature works fully. A clean-browser test planted a 10-item litter goal, recorded 2 items at a time, saw the tree reach 20%, 40%, 60%, 80%, and 100%, and confirmed the Growth Shop opened only at 100%. Refreshing kept the goal and progress. All three article buttons unlocked, and the wildlife article opened with its real NOAA source link. Starting another goal kept the shop open. A separate 0.3 kWh electricity goal accepted 0.1 kWh steps and reached 100%. The real local app also loaded the builder’s existing completed goal with a full tree and open shop, without changing that saved progress. No production repair was needed; regression tests now cover every goal type reaching full bloom through valid steps.
 
+## Eco comic shop, 2026-11-25
+
+The Growth Shop now includes three original mini comics about reusing bags, preventing food waste, and protecting wildlife. A completed tree earns 10 leaves in total, with one leaf for each 10% of recorded progress. Comics cost 4, 5, or 6 leaves; purchases and the leaf balance save locally, while the articles remain free. Clean-browser testing earned leaves through all five tree stages, bought and read comics, rejected an unaffordable purchase without spending leaves, reloaded with purchases intact, and kept the collection after starting a new electricity goal. The real local app loaded the builder’s existing version-1 save with zero leaves and no owned comics, without changing that save or sending an AI request.
+
 Privacy check tuning on 2026-11-10: some ordinary questions were wrongly called personal information (“I live in a small apartment building”, “2018 2019”, “1 2 3 4 5 6 7 8”, “a good 1 way to reuse bags”, “the secret is…”). The checks now need a stronger signal, and both directions were re-tested: 21 personal-information examples still blocked, 22 ordinary goal questions pass. In the browser, a previously mis-flagged question now reaches the normal setup message with zero warnings, while a made-up address still warns on the first try.
 
 ## GitHub Pages fix, 2026-11-16
 
 The repo already has GitHub Pages turned on, so the live site is https://jacksonzheng0201-hash.github.io/SI-JackosonZ/. It looked blank, unstyled and unclickable for two separate reasons: (1) the page asked for `/style.css` and `/app.js` from the site root, but Pages serves this project under the `/SI-JackosonZ/` path, so both requests returned 404, and (2) GitHub was showing only the `public/` folder of an earlier upload, so the folder layout did not match. Now every asset is referenced relative to the page (`./style.css`, `./app.js`, `./favicon.svg`, brand link `./`) and the repository root holds one tiny forwarding page that opens `./public/`, so Pages finds the app wherever the project path is.
 
-GitHub Pages only serves plain files. It cannot run `server.mjs`, so the hosted copy has no AI: the guide says plainly that the AI lives in the local app, the question box and quick prompts are disabled there, and nothing is ever sent or charged. Everything else works online — planting a goal, recording progress, the five tree stages, saving in that browser, and opening the Growth Shop articles with their real source links. The AI still runs from the project folder with `./start.sh`, which is the version to film. No key is uploaded: Pages serves the whole repository to anyone, so `.env` and `PASTE-KEY-HERE.txt` stay ignored, and the repository's own copy of `PASTE-KEY-HERE.txt` must still be deleted from GitHub and the key revoked in OpenAI.
+GitHub Pages only serves plain files. It cannot run `server.mjs`, so the hosted copy has no AI: the guide says plainly that the AI lives in the local app, the question box and quick prompts are disabled there, and nothing is ever sent or charged. Everything else works online — planting a goal, recording progress, earning leaves, the five tree stages, saving in that browser, opening the free Growth Shop articles with their real source links, and buying or rereading eco comics with earned leaves. The AI still runs from the project folder with `./start.sh`, which is the version to film. No key is uploaded: Pages serves the whole repository to anyone, so `.env` and `PASTE-KEY-HERE.txt` stay ignored, and the repository's own copy of `PASTE-KEY-HERE.txt` must still be deleted from GitHub and the key revoked in OpenAI.
 
 Push landed 2026-11-16: remote `main` moved `cdaa50c` → `d82bc3d` as an ordinary fast-forward on top of both earlier uploads, so nothing was overwritten and no history was rewritten. The visible file list is now the 20 project files (root `index.html`, `public/`, `tests/`, `.gitignore`, `.env.example`) and no key file. Checked in the live site: `https://jacksonzheng0201-hash.github.io/SI-JackosonZ/` forwards to `public/`, the style sheet and all five scripts return 200, 220 rules apply, planting a 3-item goal, recording it to 100%, opening the Growth Shop and reading the NOAA article all work, the guide says the AI lives in the local app, and the test progress was cleared afterwards so her first visit looks brand new. The key file is still readable inside the two earlier commits, so revoking it in OpenAI stays step 1.
 
 ## Maybe Later
 
-- More Growth Shop articles, teacher/student review, cosmetic plant accessories, and research on whether article reading increases goal completion.
+- More Growth Shop articles and eco comics, teacher/student review, cosmetic plant accessories, and research on whether reading increases goal completion.
 - More trees, goal history, optional reminders, and measured user testing against ordinary recycling information.
 - School-approved local recycling rules and teacher-reviewed printable announcements.
 - A database and optional accounts only after an adult reviews privacy, consent, access, retention, and deletion rules.

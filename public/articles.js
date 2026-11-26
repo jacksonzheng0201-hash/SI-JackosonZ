@@ -51,3 +51,39 @@ export const articles = [
     question: 'What is one safe way to collect litter for my goal?',
   },
 ];
+
+export const comics = [
+  {
+    id: 'bag-comeback-comic', issue: '01', title: 'The Bag That Came Back',
+    teaser: 'A forgotten bag gets another trip and discovers why reuse matters.', price: 4, color: 'sage', icon: 'i-leaf',
+    panels: [
+      { title: 'A bag in the cupboard', text: 'Sam found a sturdy bag tucked away at home. “One more trip?” Sam asked. A trusted adult helped check that it was still clean and strong.', icon: 'i-book' },
+      { title: 'Why bring it again?', text: 'Using something again can mean fewer new bags are needed. EPA reports that only 8.7% of U.S. plastic municipal waste was recycled in 2018, so keeping a suitable bag in use is one small helpful habit.', icon: 'i-leaf' },
+      { title: 'The comeback', text: 'The bag came back from the shop. Sam put it by the door for next time. Worn-out plastic bags need special drop-off or local disposal—not usually the ordinary recycling bin.', icon: 'i-check' },
+    ],
+    action: 'Try this: with an adult, choose one bag you already own and keep it ready for the next trip.',
+    source: { title: 'EPA · Plastics: Material-Specific Data (2018)', url: 'https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/plastics-material-specific-data' },
+  },
+  {
+    id: 'leftover-rescue-comic', issue: '02', title: 'The Lunch-Box Rescue',
+    teaser: 'One careful plan helps good food become a meal instead of waste.', price: 5, color: 'peach', icon: 'i-spark',
+    panels: [
+      { title: 'The fridge mystery', text: 'Riley opened the fridge and found food that needed using. Instead of buying more right away, Riley asked a trusted adult what was still safe.', icon: 'i-book' },
+      { title: 'Why does food matter?', text: 'Growing, moving, and preparing food takes resources. EPA recommends checking what you already have before shopping and planning meals around food that needs using.', icon: 'i-spark' },
+      { title: 'A small rescue plan', text: 'Together they planned one meal and wrote down only what was missing. Riley never tasted food to test it and left any unsure food for an adult to handle.', icon: 'i-check' },
+    ],
+    action: 'Try this: ask an adult to help plan one safe meal around food you already have.',
+    source: { title: 'EPA · Preventing Wasted Food at Home', url: 'https://www.epa.gov/recycle/preventing-wasted-food-home' },
+  },
+  {
+    id: 'litter-detective-comic', issue: '03', title: 'The Litter Detective',
+    teaser: 'A tiny piece of litter turns into a big clue for a wildlife protector.', price: 6, color: 'sand', icon: 'i-shield',
+    panels: [
+      { title: 'A clue by the path', text: 'Avery spotted an ordinary bottle on a safe path. Avery left sharp or unknown objects alone and asked a trusted adult to help with the cleanup.', icon: 'i-book' },
+      { title: 'Why is litter a clue?', text: 'NOAA explains that animals can mistake plastic for food. Eating it can injure them or block their digestive systems. Small pieces can matter, too.', icon: 'i-shield' },
+      { title: 'Case closed—carefully', text: 'The bottle went to the right bin, and Avery washed up. The detective’s best tool was not a gadget. It was stopping, staying safe, and asking for help.', icon: 'i-check' },
+    ],
+    action: 'Try this: with an adult, choose a safe cleanup spot and leave dangerous or unknown trash alone.',
+    source: { title: 'NOAA · Ingestion: When Animals Eat Marine Debris', url: 'https://marinedebris.noaa.gov/why-marine-debris-problem/ingestion' },
+  },
+];

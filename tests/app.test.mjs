@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { goalTypes, validGoal, progress, treeStage, addProgress } from '../public/goals.js';
-import { articles, featuredArticle } from '../public/articles.js';
+import { goalTypes, validGoal, progress, treeStage, addProgress, leavesForProgress } from '../public/goals.js';
+import { articles, featuredArticle, comics } from '../public/articles.js';
 import { containsPersonalInformation } from '../public/privacy.js';
 import { loadState, saveState, removeGoal } from '../public/storage.js';
 
@@ -69,6 +69,16 @@ test('every goal type can reach full bloom through valid recorded steps', () => 
   }
 });
 
+test('recorded progress earns one leaf per ten percentage points', () => {
+  assert.equal(leavesForProgress(0, 100), 10);
+  assert.equal(leavesForProgress(0, 20), 2);
+  assert.equal(leavesForProgress(20, 40), 2);
+  assert.equal(leavesForProgress(33, 66), 3);
+  assert.equal(leavesForProgress(66, 100), 4);
+  assert.equal(leavesForProgress(100, 100), 0);
+  assert.equal(leavesForProgress(50, 40), 0);
+});
+
 test('common personal details are blocked and safe goal questions are allowed', () => {
   for (const text of ['My address is 123 Example Street', '123 Example Street', 'test@example.invalid', 'My name is Example Person', 'My school is Example School', 'I go to Example Middle School', 'I live at 123 Imaginary Road', '555-010-1234', 'My phone number is 555 123 4567', '+1 800 555 0199', 'password: not-a-real-password', 'test [at] example [dot] invalid']) {
     assert.equal(containsPersonalInformation(text), true, text);
@@ -93,20 +103,36 @@ test('all shop articles are unique, linked, and ready for every goal', () => {
   }
 });
 
-test('goal, privacy count, and permanent shop unlock persist, but chat does not', () => {
+test('eco comics are unique, affordable with earned leaves, and source-linked', () => {
+  assert.equal(new Set(comics.map(comic => comic.id)).size, comics.length);
+  for (const comic of comics) {
+    assert.ok(Number.isInteger(comic.price) && comic.price > 0 && comic.price <= 10);
+    assert.ok(comic.title.length > 0 && comic.teaser.length > 0 && comic.action.length > 0);
+    assert.ok(comic.panels.length >= 3);
+    for (const panel of comic.panels) assert.ok(panel.title.length > 0 && panel.text.length > 0);
+    const url = new URL(comic.source.url);
+    assert.equal(url.protocol, 'https:');
+    assert.ok(['www.epa.gov', 'marinedebris.noaa.gov'].includes(url.hostname));
+  }
+});
+
+test('goal, privacy count, leaves, comics, and permanent shop unlock persist, but chat does not', () => {
   const memory = new Map();
   Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
     getItem: key => memory.get(key) ?? null,
     setItem: (key, value) => memory.set(key, value),
   } });
-  assert.equal(loadState().state.goal, null);
-  assert.equal(saveState({ goal, privacyStrikes: 1, shopUnlocked: true, chat: 'must not persist' }), true);
-  assert.deepEqual(loadState().state, { version: 1, goal, privacyStrikes: 1, shopUnlocked: true });
+  assert.deepEqual(loadState().state, { version: 2, goal: null, privacyStrikes: 0, shopUnlocked: false, leaves: 0, ownedComics: [] });
+  assert.equal(saveState({ goal, privacyStrikes: 1, shopUnlocked: true, leaves: 7, ownedComics: ['bag-comeback-comic', 'not-a-comic', 'bag-comeback-comic'], chat: 'must not persist' }), true);
+  assert.deepEqual(loadState().state, { version: 2, goal, privacyStrikes: 1, shopUnlocked: true, leaves: 7, ownedComics: ['bag-comeback-comic'] });
   assert.equal([...memory.values()][0].includes('must not persist'), false);
-  removeGoal({ goal, privacyStrikes: 1, shopUnlocked: true });
-  assert.deepEqual(loadState().state, { version: 1, goal: null, privacyStrikes: 1, shopUnlocked: true });
+  removeGoal({ goal, privacyStrikes: 1, shopUnlocked: true, leaves: 7, ownedComics: ['bag-comeback-comic'] });
+  assert.deepEqual(loadState().state, { version: 2, goal: null, privacyStrikes: 1, shopUnlocked: true, leaves: 7, ownedComics: ['bag-comeback-comic'] });
   memory.set('de-pollution-v1', JSON.stringify({ version: 1, goal, privacyStrikes: 0 }));
-  assert.equal(loadState().state.shopUnlocked, false);
+  assert.deepEqual(loadState().state, { version: 2, goal, privacyStrikes: 0, shopUnlocked: false, leaves: 0, ownedComics: [] });
+  memory.set('de-pollution-v1', JSON.stringify({ version: 2, leaves: -3, ownedComics: ['not-a-comic'] }));
+  assert.equal(loadState().state.leaves, 0);
+  assert.deepEqual(loadState().state.ownedComics, []);
   memory.set('de-pollution-v1', '{broken');
   assert.equal(loadState().available, false);
 });

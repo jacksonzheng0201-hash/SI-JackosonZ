@@ -1,5 +1,5 @@
-import { goalTypes, sampleGoals, progress, treeStage, validGoal, addProgress } from './goals.js';
-import { articles, featuredArticle } from './articles.js';
+import { goalTypes, sampleGoals, progress, treeStage, validGoal, addProgress, leavesForProgress } from './goals.js';
+import { articles, featuredArticle, comics } from './articles.js';
 import { loadState, saveState, removeGoal } from './storage.js';
 import { containsPersonalInformation, privacyMessage } from './privacy.js';
 
@@ -34,6 +34,11 @@ function chatFeedback(message, locked = false) {
   $('chat-feedback').textContent = message;
   $('chat-feedback').hidden = !message;
   $('chat-feedback').classList.toggle('locked', locked);
+}
+
+function comicFeedback(message, error = false) {
+  $('comic-feedback').textContent = message;
+  $('comic-feedback').classList.toggle('error', error);
 }
 
 function updateChatControls() {
@@ -140,15 +145,16 @@ function articleCard(article) {
 function renderShop() {
   const featured = state.goal ? featuredArticle(state.goal.kind) : null;
   const visible = featured ? [featured, ...articles.map(a => a.id).filter(id => id !== featured)] : articles.map(a => a.id);
-  $('shop-state').textContent = state.shopUnlocked ? 'Open · Free' : 'Locked';
+  $('shop-state').textContent = state.shopUnlocked ? 'Open' : 'Locked';
   $('shop-state').classList.toggle('unlocked', state.shopUnlocked);
   $('shop-description').textContent = state.shopUnlocked
-    ? 'Your first tree opened the shop. Every article is free, uses trusted facts, and connects to a real next step.'
-    : 'A few short, exciting true stories are waiting. Your first fully grown tree opens the door.';
+    ? 'Your first tree opened the shop. Articles stay free, and eco comics can be collected with leaves you earned by recording safe progress.'
+    : 'Free true stories and little green comics are waiting. Your first fully grown tree opens the door.';
   $('shop-lock-note').textContent = state.shopUnlocked
-    ? 'Articles cannot be bought. No account, prices, or personal information are needed to read them.'
-    : 'The shop is a reward for finishing one goal. Keep going—one small action at a time.';
+    ? 'Articles stay free. Comics use earned leaves only—never real money or personal information.'
+    : 'Finish one goal to open free articles and leaf-powered comics. Keep going—one small action at a time.';
   $('article-shelf').replaceChildren(...visible.map(id => articleCard(articles.find(article => article.id === id))));
+  renderComicShop();
 }
 
 function articleParagraph(text, className = '') {
@@ -193,6 +199,115 @@ function openArticle(article) {
   $('info-dialog').showModal();
 }
 
+function svgIcon(id, className = 'icon') {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('class', className);
+  const use = document.createElementNS('http://www.w3.org/1999/xlink', 'use');
+  use.setAttribute('href', `#${id}`);
+  svg.append(use);
+  return svg;
+}
+
+function comicCard(comic) {
+  const owned = state.ownedComics.includes(comic.id);
+  const card = document.createElement('article');
+  card.className = `comic-card color-${comic.color}${owned ? ' owned' : ''}`;
+  const cover = document.createElement('div');
+  cover.className = 'comic-cover';
+  const issue = document.createElement('span');
+  issue.className = 'comic-issue';
+  issue.textContent = `ISSUE ${comic.issue}`;
+  cover.append(svgIcon(comic.icon), issue);
+  const title = document.createElement('h4');
+  title.textContent = comic.title;
+  const teaser = document.createElement('p');
+  teaser.className = 'comic-preview';
+  teaser.textContent = comic.teaser;
+  const price = document.createElement('span');
+  price.className = 'comic-price';
+  price.textContent = owned ? 'In your collection' : `${comic.price} leaves`;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `comic-buy${owned ? ' owned' : ''}${!owned && state.leaves < comic.price ? ' unaffordable' : ''}`;
+  button.textContent = owned ? 'Read again' : state.shopUnlocked ? `Buy for ${comic.price} leaves` : 'Unlocks with your first tree';
+  button.disabled = !state.shopUnlocked;
+  button.addEventListener('click', () => {
+    if (!state.shopUnlocked) return;
+    if (owned) openComic(comic);
+    else buyComic(comic);
+  });
+  card.append(cover, title, teaser, price, button);
+  return card;
+}
+
+function renderComicShop() {
+  const leafLabel = document.createElement('span');
+  leafLabel.textContent = `${state.leaves} ${state.leaves === 1 ? 'leaf' : 'leaves'}`;
+  $('leaf-balance').replaceChildren(svgIcon('i-leaf', 'icon small'), leafLabel);
+  $('comic-shop-note').textContent = state.shopUnlocked
+    ? 'Spend your leaves on mini comics about reuse, food, and wildlife. Every comic is yours to reread, even after you plant another goal.'
+    : 'Your first full tree opens this shelf. You can already earn one leaf for each 10% of goal progress you record.';
+  $('comic-shelf').replaceChildren(...comics.map(comicCard));
+}
+
+function buyComic(comic) {
+  if (!state.shopUnlocked) return comicFeedback('Grow your first tree to open the comic shelf.', true);
+  if (state.ownedComics.includes(comic.id)) return openComic(comic);
+  if (state.leaves < comic.price) {
+    return comicFeedback(`You need ${comic.price - state.leaves} more ${comic.price - state.leaves === 1 ? 'leaf' : 'leaves'} for this comic. Record more safe progress to earn them.`, true);
+  }
+  state.leaves -= comic.price;
+  state.ownedComics = [...state.ownedComics, comic.id];
+  persist();
+  renderComicShop();
+  comicFeedback(`You collected “${comic.title}.” It is yours to read anytime.`);
+}
+
+function openComic(comic) {
+  const content = document.createElement('div');
+  content.className = `comic-reader color-${comic.color}`;
+  const label = document.createElement('p');
+  label.className = 'eyebrow';
+  label.textContent = `ECO COMIC ${comic.issue} · A MADE-UP STORY WITH REAL FACTS`;
+  const title = document.createElement('h2');
+  title.textContent = comic.title;
+  const teaser = document.createElement('p');
+  teaser.className = 'comic-teaser';
+  teaser.textContent = comic.teaser;
+  const panels = document.createElement('div');
+  panels.className = 'comic-panels';
+  for (const [index, panel] of comic.panels.entries()) {
+    const frame = document.createElement('section');
+    frame.className = 'comic-panel';
+    const marker = document.createElement('span');
+    marker.className = 'comic-panel-marker';
+    marker.append(svgIcon(panel.icon, 'icon small'));
+    const body = document.createElement('div');
+    const heading = document.createElement('h3');
+    heading.textContent = `${index + 1}. ${panel.title}`;
+    const text = document.createElement('p');
+    text.textContent = panel.text;
+    body.append(heading, text);
+    frame.append(marker, body);
+    panels.append(frame);
+  }
+  const action = articleParagraph(comic.action, 'comic-action');
+  const sourceLabel = articleParagraph('READ THE REAL SOURCE', 'article-source-label');
+  const source = document.createElement('a');
+  source.href = comic.source.url;
+  source.target = '_blank';
+  source.rel = 'noopener noreferrer';
+  source.textContent = `${comic.source.title} ↗`;
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'comic-back';
+  back.textContent = 'Back to the comic shelf';
+  back.addEventListener('click', () => $('info-dialog').close());
+  content.append(label, title, teaser, panels, action, sourceLabel, source, back);
+  $('dialog-content').replaceChildren(content);
+  $('info-dialog').showModal();
+}
+
 for (const [value, type] of Object.entries(goalTypes)) {
   const option = document.createElement('option');
   option.value = value;
@@ -226,13 +341,17 @@ $('goal-form').addEventListener('submit', event => {
 $('log-form').addEventListener('submit', event => {
   event.preventDefault();
   if (busy) return;
+  const before = progress(state.goal);
   const updated = addProgress(state.goal, Number($('log-amount').value));
   if (!updated) return feedback('Enter a positive amount no larger than what is left in your goal.', true);
+  const after = progress(updated);
+  const earned = leavesForProgress(before, after);
   state.goal = updated;
+  state.leaves += earned;
   persist();
   renderGoal();
-  renderShop();
-  feedback(progress(updated) === 100 ? '100% recorded. Your tree is fully grown—the Growth Shop is open!' : `${progress(updated)}% recorded. Small steps count.`);
+  const leafNote = earned ? ` You earned ${earned} ${earned === 1 ? 'leaf' : 'leaves'} for the comic shelf.` : '';
+  feedback(after === 100 ? `100% recorded. Your tree is fully grown—the Growth Shop is open!${leafNote}` : `${after}% recorded. Small steps count.${leafNote}`);
 });
 
 function showDialog(html) {
@@ -258,7 +377,7 @@ function confirmChange() {
 $('change-goal').addEventListener('click', confirmChange);
 $('new-goal').addEventListener('click', confirmChange);
 $('close-dialog').addEventListener('click', () => $('info-dialog').close());
-$('how-button').addEventListener('click', () => showDialog('<h2>One goal. A little growth.</h2><ol><li><strong>Plant a goal.</strong> Choose something small and safe. The examples are made up; every new goal starts at zero.</li><li><strong>Ask your guide.</strong> Type a question and press the check mark. Only then does the server ask OpenAI, using your goal and the instructions in BRIEF.md.</li><li><strong>Take a safe step.</strong> Record what you actually did. Your tree grows at 20%, 40%, 60%, 80%, and 100%.</li><li><strong>Open the Growth Shop.</strong> Finish one goal and three free true-story articles become readable. Ask the guide about one of them anytime.</li></ol><p>The tree is a progress picture, not a real planted tree or proof of pollution prevented. Your goal saves only in this browser. Chats are not saved by this app.</p><p><strong>Made for small beginnings.</strong> No account, purchases, public rankings, or pressure. After your first tree reaches 100%, the Growth Shop opens and stays open on this computer. It contains only free, source-linked articles.</p>'));
+$('how-button').addEventListener('click', () => showDialog('<h2>One goal. A little growth.</h2><ol><li><strong>Plant a goal.</strong> Choose something small and safe. The examples are made up; every new goal starts at zero.</li><li><strong>Ask your guide.</strong> Type a question and press the check mark. Only then does the server ask OpenAI, using your goal and the instructions in BRIEF.md.</li><li><strong>Take a safe step.</strong> Record what you actually did. Your tree grows at 20%, 40%, 60%, 80%, and 100%.</li><li><strong>Open the Growth Shop.</strong> Finish one goal to read three free true stories and collect mini eco comics with leaves earned from your recorded progress.</li></ol><p>The tree is a progress picture, not a real planted tree or proof of pollution prevented. Your goal, leaves, and comics save only in this browser. Chats are not saved by this app.</p><p><strong>Made for small beginnings.</strong> No account, real-money purchases, public rankings, or pressure. You earn one leaf for each 10% of goal progress. After your first tree reaches 100%, the Growth Shop opens and stays open on this computer.</p>'));
 $('sources-button').addEventListener('click', () => showDialog('<h2>Real sources. Small steps.</h2><p>Our guide uses these checked sources, not a live web search. Older figures keep their original dates.</p><ul><li><a href="https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/national-overview-facts-and-figures-materials" target="_blank" rel="noopener noreferrer">EPA: everyday waste in the U.S.</a><br>292.4 million tons generated in 2018. This is not a measurement of litter.</li><li><a href="https://www.epa.gov/facts-and-figures-about-materials-waste-and-recycling/plastics-material-specific-data" target="_blank" rel="noopener noreferrer">EPA: plastic recycling</a><br>8.7% of plastic municipal waste recycled in 2018. The rest did not all enter the ocean.</li><li><a href="https://marinedebris.noaa.gov/why-marine-debris-problem/ingestion" target="_blank" rel="noopener noreferrer">NOAA: plastic and wildlife</a><br>Eating plastic can injure animals and block their digestive systems.</li><li><a href="https://www.epa.gov/recycle/preventing-wasted-food-home" target="_blank" rel="noopener noreferrer">EPA: prevent wasted food at home</a><br>Plan around food you have before buying more.</li></ul><p>Existing tools such as Recycle Coach already help people recycle. Our prototype combines a personal goal, a tree, and guidance based on recorded progress. We have not proven it changes habits better than other tools.</p>'));
 
 $('question').addEventListener('input', updateChatControls);
@@ -365,9 +484,9 @@ $('chat-form').addEventListener('submit', async event => {
 async function checkConfig() {
   if (isGitHubPages) {
     $('connection-status').classList.add('unready');
-    $('connection-status').querySelector('span:last-child').textContent = 'GitHub Pages · goals and articles work; AI is unavailable here';
+    $('connection-status').querySelector('span:last-child').textContent = 'GitHub Pages · goals, articles, and comics work; AI is unavailable here';
     $('chat-area').replaceChildren();
-    chatFeedback('GitHub Pages cannot run the AI server. You can still plant a goal, grow your tree, and unlock articles. Use the app running on your computer for AI guidance. Never upload an API key to GitHub.');
+    chatFeedback('GitHub Pages cannot run the AI server. You can still plant a goal, grow your tree, read articles, and collect eco comics with earned leaves. Use the app running on your computer for AI guidance. Never upload an API key to GitHub.');
     updateChatControls();
     return;
   }
