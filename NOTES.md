@@ -14,7 +14,7 @@ Open http://127.0.0.1:4317. Stop with Ctrl+C. No package installation or databas
 
 OpenAI model: gpt-5.6-luna
 
-Use the exact model name from OpenAI's model list on that line: no spaces, no extra words. The app reads only this one line, so a name typed with spaces (for example "gpt 5.0 Luna") is read as empty and the AI stays off. The chosen model is GPT-5.6 Luna, whose API name is `gpt-5.6-luna`. If OpenAI ever says this model is not available for your account, ask a trusted adult to check the exact name in your OpenAI account and update this line.
+Use the exact model name from OpenAI's model list on that line: no spaces, no extra words. The app reads only this one line, so a name typed with spaces (for example "gpt 5.0 Luna") is read as empty and the AI stays off. The chosen model is GPT-5.6 Luna, whose API name is `gpt-5.6-luna`. If OpenAI ever says this model is not available for your account, ask a trusted adult to check the exact name in your OpenAI account and update this line. On 2026-11-22 `getKey()` reached OpenAI's model list successfully and the six usable models contained exactly one name with “luna” in it, which confirms `gpt-5.6-luna` rather than guessing it.
 
 The AI connects to OpenAI through the server-only `getKey()` function in `keygen.mjs`. It signs in to MindDo with Vercel environment variables, or locally with `KEYGEN_URL` and `KEYGEN_TOKEN` in `.env`; `keygen.mjs` reads the environment first and then `.env`. The browser never receives either value or the temporary OpenAI key. MindDo returns JSON with `apiKey` and `expiresAt`; the server reuses that key until it expires. If OpenAI rejects it with 401 or 403, the server drops only that cached key, asks `getKey()` once for a replacement, and retries the answer once. A failed MindDo lookup is attempted only once: its `error.message` is shown on the page and its `error.fix` is written to the server log.
 
@@ -74,9 +74,13 @@ The brief says no existing tools exist, but earlier research found Recycle Coach
 
 ## Verification
 
-Implementation is ready for local browser and automated testing. 27/27 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
+Implementation is ready for local browser and automated testing. 35/35 tests pass, and browser testing confirmed planting, 100% progress, persistence, shop unlocking, article reading, article question handoff, privacy warning/lock, and setup unavailable handling. The app’s OpenAI adapter uses a real API request path and now reports the setup as ready with a saved key; the assistant has not sent a question itself, because only the builder presses the check mark and each answer may cost money. The model name is set to `gpt-5.6-luna`. No mock reply is used as a substitute for real AI in the app.
 
 A local Git save point was created after browser saving passed. The private `.env` is ignored and was not committed.
+
+## Green-goal MVP re-check, 2026-11-25
+
+The requested goal feature works fully. A clean-browser test planted a 10-item litter goal, recorded 2 items at a time, saw the tree reach 20%, 40%, 60%, 80%, and 100%, and confirmed the Growth Shop opened only at 100%. Refreshing kept the goal and progress. All three article buttons unlocked, and the wildlife article opened with its real NOAA source link. Starting another goal kept the shop open. A separate 0.3 kWh electricity goal accepted 0.1 kWh steps and reached 100%. The real local app also loaded the builder’s existing completed goal with a full tree and open shop, without changing that saved progress. No production repair was needed; regression tests now cover every goal type reaching full bloom through valid steps.
 
 Privacy check tuning on 2026-11-10: some ordinary questions were wrongly called personal information (“I live in a small apartment building”, “2018 2019”, “1 2 3 4 5 6 7 8”, “a good 1 way to reuse bags”, “the secret is…”). The checks now need a stronger signal, and both directions were re-tested: 21 personal-information examples still blocked, 22 ordinary goal questions pass. In the browser, a previously mis-flagged question now reaches the normal setup message with zero warnings, while a made-up address still warns on the first try.
 

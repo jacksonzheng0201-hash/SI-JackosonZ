@@ -50,6 +50,25 @@ test('progress rejects negative, fractional item counts and over-reporting', () 
   assert.deepEqual(addProgress({ kind: 'electricity', target: 0.3, completed: 0.1 }, 0.2), { kind: 'electricity', target: 0.3, completed: 0.3 });
 });
 
+test('every goal type can reach full bloom through valid recorded steps', () => {
+  const examples = [
+    ['litter', 5, 1],
+    ['materials', 4, 1],
+    ['food', 2, 1],
+    ['electricity', 0.3, 0.1],
+    ['prevention', 3, 1],
+  ];
+  for (const [kind, target, step] of examples) {
+    let current = { kind, target, completed: 0 };
+    for (let i = 0; i < Math.round(target / step); i++) {
+      current = addProgress(current, step);
+      assert.ok(validGoal(current));
+    }
+    assert.equal(progress(current), 100);
+    assert.equal(treeStage(current), 5);
+  }
+});
+
 test('common personal details are blocked and safe goal questions are allowed', () => {
   for (const text of ['My address is 123 Example Street', '123 Example Street', 'test@example.invalid', 'My name is Example Person', 'My school is Example School', 'I go to Example Middle School', 'I live at 123 Imaginary Road', '555-010-1234', 'My phone number is 555 123 4567', '+1 800 555 0199', 'password: not-a-real-password', 'test [at] example [dot] invalid']) {
     assert.equal(containsPersonalInformation(text), true, text);
